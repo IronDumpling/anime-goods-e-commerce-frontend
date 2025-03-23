@@ -1,5 +1,11 @@
 {
   "files": [],
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@shadcn/*": ["node_modules/@shadcn/ui/*"]
+    }
+  },
   "references": [
     { "path": "./tsconfig.app.json" },
     { "path": "./tsconfig.node.json" }
