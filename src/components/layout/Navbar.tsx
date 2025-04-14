@@ -1,7 +1,8 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../ui/Button";
 import { useTheme } from "../../context/ThemeContext";
 import { Input } from "@/components/ui/Input";
+import { useAuth } from "@/context/AuthContext";
 
 import {
   NavigationMenu,
@@ -59,6 +60,57 @@ const getProductCategoryComponents = () => {
 
 export default function Navbar() {
   const { toggleTheme } = useTheme();
+  const { isLoggedIn, username, logout, login } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogin = () => {
+    login("default_user");
+    // navigate('/login');
+  };
+
+  const renderUserMenu = () => {
+    if (!isLoggedIn) {
+      return (
+        <div className="w-[200px] p-4">
+          <p className="text-sm text-foreground/80 mb-4">You are not logged in</p>
+          <Button
+            className="w-full"
+            onClick={handleLogin}
+          >
+            Login
+          </Button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="w-[200px] p-4">
+        <div className="mb-4">
+          <p className="text-sm font-medium">Welcome, {username}!</p>
+        </div>
+        <div className="grid gap-3">
+          <Link
+            to="/orders"
+            className="block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground text-sm"
+          >
+            Orders
+          </Link>
+          <Link
+            to="/settings"
+            className="block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground text-sm"
+          >
+            Settings
+          </Link>
+          <Button
+            className="w-full"
+            onClick={logout}
+          >
+            Logout
+          </Button>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="sticky top-0 z-50 w-full border-b">
@@ -101,16 +153,7 @@ export default function Navbar() {
                 <User className="h-5 w-5" />
               </NavigationMenuTrigger>
               <NavigationMenuContent className="bg-popover text-popover-foreground">
-                <div className="w-[100px] p-2">
-                  <div className="grid gap-3">
-                    <Link to="/orders" className="block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground text-sm">
-                      Orders
-                    </Link>
-                    <Link to="/settings" className="block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground text-sm">
-                      Settings
-                    </Link>
-                  </div>
-                </div>
+                {renderUserMenu()}
               </NavigationMenuContent>
             </NavigationMenuItem>
 
