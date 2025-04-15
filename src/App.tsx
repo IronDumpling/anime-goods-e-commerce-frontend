@@ -54,7 +54,7 @@ function App() {
         <Route path="user">
           <Route path="/user" element={<UserDashboard />} /> {/* Stage 1. User */}
           <Route path="/user/orders" element={<UserOrders />} /> {/* Stage 3. Order */}
-          <Route path="/user/security" element={<UserSecurity />} /> {/* Stage 1. User */}
+          <Route path="/user/account" element={<UserSecurity />} /> {/* Stage 1. User */}
           <Route path="/user/addresses" element={<UserAddresses />} /> {/* Stage 1. User */}
           <Route path="/user/payments" element={<UserPayments />} /> {/* Stage 3. Order */}
         </Route>

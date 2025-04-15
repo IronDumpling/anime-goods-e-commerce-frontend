@@ -13,7 +13,7 @@ function UserDashboard() {
         <UserDashboardCard
           title="Login & Security"
           description="Update password, name, or delete account"
-          to="/user/security"
+          to="/user/account"
         />
         <UserDashboardCard
           title="Your Addresses"

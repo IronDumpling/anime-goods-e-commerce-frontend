@@ -90,16 +90,16 @@ export default function Navbar() {
         </div>
         <div className="grid gap-3">
           <Link
-            to="/orders"
-            className="block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground text-sm"
-          >
-            Orders
-          </Link>
-          <Link
             to="/user"
             className="block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground text-sm"
           >
-            Account
+            Dashboard
+          </Link>
+          <Link
+            to="/user/orders"
+            className="block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground text-sm"
+          >
+            Orders
           </Link>
           <Button
             className="w-full"
