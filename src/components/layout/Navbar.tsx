@@ -96,10 +96,10 @@ export default function Navbar() {
             Orders
           </Link>
           <Link
-            to="/settings"
+            to="/user"
             className="block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground text-sm"
           >
-            Settings
+            Account
           </Link>
           <Button
             className="w-full"

@@ -17,7 +17,6 @@ import UserOrders from "./pages/Orders/UserOrders";
 import UserSecurity from "./pages/User/UserSecurity";
 import UserAddresses from "./pages/User/UserAddresses";
 import UserPayments from "./pages/User/UserPayments";
-import UserOrders from "./pages/Orders/UserOrders";
 import Login from "./pages/User/Login";
 import Register from "./pages/User/Register";
 
