@@ -1,18 +1,26 @@
 import { Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
 import { AuthProvider } from "./context/AuthContext";
-import Layout from "./components/layout/Layout";
 
+import Layout from "./components/layout/Layout";
 import Home from "./pages/Home";
+
 import ProductList from "./pages/Products/ProductList";
 import ProductDetail from "./pages/Products/ProductDetail";
+
 import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import OrderDetail from "./pages/Orders/OrderDetail";
-import UserProfile from "./pages/User/UserProfile";
-import UserOrders from "./pages/User/UserOrders";
+
+import UserDashboard from "./pages/User/UserDashboard";
+import UserOrders from "./pages/Orders/UserOrders";
+import UserSecurity from "./pages/User/UserSecurity";
+import UserAddresses from "./pages/User/UserAddresses";
+import UserPayments from "./pages/User/UserPayments";
+import UserOrders from "./pages/Orders/UserOrders";
 import Login from "./pages/User/Login";
 import Register from "./pages/User/Register";
+
 import AdminDashboard from "./pages/Admin/AdminDashboard";
 import ManageUsers from "./pages/Admin/ManageUsers";
 import ManageProducts from "./pages/Admin/ManageProducts";
@@ -45,8 +53,11 @@ function App() {
 
         {/* User Account Routes */}
         <Route path="user">
-          <Route index element={<UserProfile />} /> {/* Stage 1. User */}
-          <Route path="orders" element={<UserOrders />} /> {/* Stage 3. Order */}
+          <Route path="/user" element={<UserDashboard />} /> {/* Stage 1. User */}
+          <Route path="/user/orders" element={<UserOrders />} /> {/* Stage 3. Order */}
+          <Route path="/user/security" element={<UserSecurity />} /> {/* Stage 1. User */}
+          <Route path="/user/addresses" element={<UserAddresses />} /> {/* Stage 1. User */}
+          <Route path="/user/payments" element={<UserPayments />} /> {/* Stage 3. Order */}
         </Route>
         <Route path="login" element={<Login />} /> {/* Stage 1. User */}
         <Route path="register" element={<Register />} /> {/* Stage 1. User */}
