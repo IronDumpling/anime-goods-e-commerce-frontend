@@ -66,16 +66,16 @@ const HttpError: React.FC<HttpErrorProps> = ({
         <div className="text-6xl mb-6 animate-bounce">
           {config.icon}
         </div>
-        <h1 className="text-4xl font-bold mb-2 text-gray-800">
+        <h1 className="text-4xl font-bold mb-2 text-foreground">
           {code}<br/>{config.title}
         </h1>
-        <p className="text-lg text-gray-600 mb-8">
+        <p className="text-lg text-muted-foreground mb-8">
           {message || config.description}
         </p>
         <div className="space-y-4">
           <button
             onClick={handleAction}
-            className="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-200 font-medium"
+            className="px-6 py-3 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors duration-200 font-medium"
           >
             {config.action}
           </button>
@@ -83,7 +83,7 @@ const HttpError: React.FC<HttpErrorProps> = ({
             <div>
               <button
                 onClick={() => navigate('/')}
-                className="text-indigo-600 hover:text-indigo-800 transition-colors duration-200"
+                className="text-primary hover:text-primary/80 transition-colors duration-200"
               >
                 Go to Homepage
               </button>

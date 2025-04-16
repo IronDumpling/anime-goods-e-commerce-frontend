@@ -36,13 +36,13 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     // For now, we'll just show a message
     return (
       <div className="p-4">
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-card text-card-foreground rounded-lg shadow-md p-6">
           <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
-          <p className="text-gray-600 mb-4">
+          <p className="text-muted-foreground mb-4">
             You don't have permission to access this page. Redirecting to {fallbackPath}...
           </p>
-          <p className="text-sm text-gray-500 mb-4">
-            Current path: <span className="font-mono bg-gray-100 px-2 py-1 rounded">{currentPath}</span>
+          <p className="text-sm text-muted-foreground mb-4">
+            Current path: <span className="font-mono bg-muted px-2 py-1 rounded">{currentPath}</span>
           </p>
         </div>
       </div>
@@ -53,15 +53,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   if (!children || (Array.isArray(children) && children.length === 0)) {
     return (
       <div className="p-4">
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="bg-card text-card-foreground rounded-lg shadow-md p-6">
           <h1 className="text-2xl font-bold mb-4">
-            {accessLevel === 'admin' ? 'Admin Dashboard' : 'User Dashboard'}
+            {accessLevel === 'admin' ? 'Admin Protected Page' : 'User Protected Page'}
           </h1>
-          <p className="text-gray-600 mb-4">
+          <p className="text-muted-foreground mb-4">
             This is a placeholder for the {accessLevel}-protected page. Implementation coming soon.
           </p>
-          <p className="text-sm text-gray-500 mb-4">
-            Current path: <span className="font-mono bg-gray-100 px-2 py-1 rounded">{currentPath}</span>
+          <p className="text-sm text-muted-foreground mb-4">
+            Current path: <span className="font-mono bg-muted px-2 py-1 rounded">{currentPath}</span>
           </p>
         </div>
       </div>
