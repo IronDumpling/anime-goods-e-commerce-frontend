@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "../ui/Button";
 import { useTheme } from "../../context/ThemeContext";
 import { Input } from "@/components/ui/Input";
@@ -60,12 +60,21 @@ const getProductCategoryComponents = () => {
 
 export default function Navbar() {
   const { toggleTheme } = useTheme();
-  const { isLoggedIn, username, logout, login } = useAuth();
+  const { isLoggedIn, username, isAdmin, logout, user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogin = () => {
-    login("default_user");
-    // navigate('/login');
+    navigate('/login', { state: { from: { pathname: location.pathname } } });
+  };
+
+  const handleLogout = () => {
+    // Navigate to home page first, then logout
+    navigate('/');
+    // Use setTimeout to ensure navigation completes before logout
+    setTimeout(() => {
+      logout();
+    }, 0);
   };
 
   const renderUserMenu = () => {
@@ -79,6 +88,48 @@ export default function Navbar() {
           >
             Login
           </Button>
+        </div>
+      );
+    }
+
+    if (isAdmin) {
+      return (
+        <div className="w-[200px] p-4">
+          <div className="mb-4">
+            <p className="text-sm font-medium">Welcome, Admin {username}!</p>
+          </div>
+          <div className="grid gap-3">
+            <Link
+              to="/admin"
+              className="block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground text-sm"
+            >
+              Dashboard
+            </Link>
+            <Link
+              to="/admin/users"
+              className="block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground text-sm"
+            >
+              Manage Users
+            </Link>
+            <Link
+              to="/admin/products"
+              className="block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground text-sm"
+            >
+              Manage Products
+            </Link>
+            <Link
+              to="/admin/orders"
+              className="block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground text-sm"
+            >
+              Manage Orders
+            </Link>
+            <Button
+              className="w-full"
+              onClick={handleLogout}
+            >
+              Logout
+            </Button>
+          </div>
         </div>
       );
     }
@@ -103,7 +154,7 @@ export default function Navbar() {
           </Link>
           <Button
             className="w-full"
-            onClick={logout}
+            onClick={handleLogout}
           >
             Logout
           </Button>
