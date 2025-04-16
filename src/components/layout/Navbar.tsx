@@ -60,7 +60,7 @@ const getProductCategoryComponents = () => {
 
 export default function Navbar() {
   const { toggleTheme } = useTheme();
-  const { isLoggedIn, username, isAdmin, logout, user } = useAuth();
+  const { isLoggedIn, username, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -69,12 +69,14 @@ export default function Navbar() {
   };
 
   const handleLogout = () => {
-    // Navigate to home page first, then logout
-    navigate('/');
+    // Navigate to home page with a state indicating we're logging out
+    navigate('/', { state: { isLoggingOut: true } });
     // Use setTimeout to ensure navigation completes before logout
     setTimeout(() => {
       logout();
-    }, 0);
+    }, 100);
+    // !(yushun): make sure the homepage displays exactly the same content
+    // no matter whether the user is logged in or not
   };
 
   const renderUserMenu = () => {
