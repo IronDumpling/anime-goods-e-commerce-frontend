@@ -3,6 +3,7 @@ import { Button } from "../ui/Button";
 import { useTheme } from "../../context/ThemeContext";
 import { Input } from "@/components/ui/Input";
 import { useAuth } from "@/context/AuthContext";
+import { mockApi, ProductCategory } from "@/lib/mock";
 
 import {
   NavigationMenu,
@@ -14,42 +15,39 @@ import {
 } from "@/components/ui/navigation-menu";
 
 import { ShoppingCart, User } from "lucide-react";
+import { useState, useEffect } from "react";
 
-
-
-const productCategory: { title: string; href: string, desc: string }[] = [
-  {
-    title: "Figures",
-    href: "/TODO",
-    desc: "Browse our collection of anime figures",
-  },
-  {
-    title: "Badges",
-    href: "/TODO",
-    desc: "TODO: desc for badges",
-  },
-  {
-    title: "Manga",
-    href: "/TODO",
-    desc: "TODO: desc for manga",
-  },
-];
-
-const getProductCategoryComponents = () => {
+const getProductCategoryComponents = (categories: ProductCategory[]) => {
   return (
     <div className="grid w-[300px] gap-2 p-3">
-      {productCategory.map((component) => (
+      {/* All Products link */}
+      <div>
+        <NavigationMenuLink asChild>
+          <Link
+            to="/products"
+            className="block select-none rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+          >
+            <div className="text-sm font-medium leading-none text-center">All Products</div>
+            <p className="mt-1 text-xs leading-snug text-foreground/80 text-center">
+              Browse all our anime merchandise
+            </p>
+          </Link>
+        </NavigationMenuLink>
+      </div>
+
+      {/* Category links */}
+      {categories.map((component) => (
         <div key={component.title}>
           <NavigationMenuLink asChild>
-            <a
+            <Link
+              to={component.href}
               className="block select-none rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
-              href={component.href}
             >
               <div className="text-sm font-medium leading-none text-center">{component.title}</div>
               <p className="mt-1 text-xs leading-snug text-foreground/80 text-center">
                 {component.desc}
               </p>
-            </a>
+            </Link>
           </NavigationMenuLink>
         </div>
       ))}
@@ -57,12 +55,25 @@ const getProductCategoryComponents = () => {
   );
 }
 
-
 export default function Navbar() {
   const { toggleTheme } = useTheme();
   const { isLoggedIn, username, isAdmin, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [categories, setCategories] = useState<ProductCategory[]>([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const data = await mockApi.categories.getAll();
+        setCategories(data);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
 
   const handleLogin = () => {
     navigate('/login', { state: { from: { pathname: location.pathname } } });
@@ -166,7 +177,7 @@ export default function Navbar() {
   };
 
   return (
-    <div className="sticky top-0 z-50 w-full border-b">
+    <div className="sticky top-0 z-50 w-full border-b bg-background">
       <div className="container flex h-14 items-center justify-between">
         <NavigationMenu>
           <NavigationMenuList className="flex items-center gap-6">
@@ -177,13 +188,13 @@ export default function Navbar() {
               </Link>
             </NavigationMenuItem>
 
-            {/* Products */}
+            {/* Products Dropdown */}
             <NavigationMenuItem>
               <NavigationMenuTrigger>
                 Products
               </NavigationMenuTrigger>
               <NavigationMenuContent className="bg-popover text-popover-foreground">
-                {getProductCategoryComponents()}
+                {getProductCategoryComponents(categories)}
               </NavigationMenuContent>
             </NavigationMenuItem>
           </NavigationMenuList>
