@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import ProtectedRoute from '@/components/layout/ProtectedRoute';
 import {
   ColumnDef,
@@ -33,50 +33,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-type User = {
-  id: number;
-  username: string;
-  email: string;
-  role: "admin" | "user";
-  status: "active" | "inactive";
-  createdAt: string;
-}
-
-const data: User[] = [
-  {
-    id: 1,
-    username: "admin",
-    email: "admin@example.com",
-    role: "admin",
-    status: "active",
-    createdAt: "2024-01-01",
-  },
-  {
-    id: 2,
-    username: "anime_lover",
-    email: "anime_lover@example.com",
-    role: "user",
-    status: "active",
-    createdAt: "2024-01-02",
-  },
-  {
-    id: 3,
-    username: "manga_reader",
-    email: "manga_reader@example.com",
-    role: "user",
-    status: "active",
-    createdAt: "2024-01-03",
-  },
-  {
-    id: 4,
-    username: "cosplay_fan",
-    email: "cosplay_fan@example.com",
-    role: "user",
-    status: "inactive",
-    createdAt: "2024-01-04",
-  },
-];
+import { mockApi, User } from '@/lib/mock';
 
 const columns: ColumnDef<User>[] = [
   {
@@ -220,9 +177,26 @@ const ManageUsers: React.FC = () => {
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
   const [globalFilter, setGlobalFilter] = useState("");
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const data = await mockApi.users.getAll();
+        setUsers(data);
+      } catch (error) {
+        console.error('Error fetching users:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
 
   const table = useReactTable({
-    data,
+    data: users,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -333,7 +307,16 @@ const ManageUsers: React.FC = () => {
                 ))}
               </TableHeader>
               <TableBody>
-                {table.getRowModel().rows?.length ? (
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={columns.length}
+                      className="h-24 text-center"
+                    >
+                      Loading...
+                    </TableCell>
+                  </TableRow>
+                ) : table.getRowModel().rows?.length ? (
                   table.getRowModel().rows.map((row) => (
                     <TableRow
                       key={row.id}

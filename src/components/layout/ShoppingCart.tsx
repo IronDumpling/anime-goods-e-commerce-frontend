@@ -1,8 +1,13 @@
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Trash } from "lucide-react";
+import { Product } from "@/lib/mock";
 
-export function ShoppingCart({ items, onRemove }: { items: any[], onRemove: Function }) {
+interface CartItem extends Product {
+  quantity: number;
+}
+
+export function ShoppingCart({ items, onRemove }: { items: CartItem[], onRemove: (id: number) => void }) {
   return (
     <Card className="p-6 w-full">
       <h2 className="text-2xl font-semibold">Shopping Cart</h2>

@@ -1,12 +1,6 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { get, post } from '@/lib/api';
-
-interface User {
-  id: string;
-  username: string;
-  email: string;
-  role: string;
-}
+import { mockApi, User } from '@/lib/mock';
 
 interface LoginResponse {
   token: string;
@@ -53,45 +47,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
+      // Use mock API for now
+      const { token, user } = await mockApi.auth.login(email, password);
+
+      // In the future, uncomment this to use the real API
       // const response = await post<LoginResponse>('/auth/login', { email, password });
-      //
       // if (response.error || !response.data) {
       //   throw new Error(response.error || 'Login failed');
       // }
-      //
       // const { token, id, username, email: userEmail, role } = response.data;
-
-      // Mock login logic
-      const mockUsername = email.split('@')[0];
-      const mockIsAdminUser = mockUsername === 'admin';
-      const mockToken = `mock_token_${Date.now()}`;
-      const mockId = Date.now().toString();
-      const mockEmail = email;
-      const { token, id, username, email: userEmail, role } = {
-        token: mockToken,
-        id: mockId,
-        username: mockUsername,
-        role: mockIsAdminUser ? 'admin' : 'user',
-        email: mockEmail,
-      };
-
-      // Create user object
-      const userData: User = {
-        id,
-        username,
-        email: userEmail,
-        role
-      };
+      // const userData: User = { id, username, email: userEmail, role };
 
       setToken(token);
-      setUser(userData);
-      setUsername(username);
-      setIsAdmin(role === 'admin');
+      setUser(user);
+      setUsername(user.username);
+      setIsAdmin(user.role === 'admin');
       setIsLoggedIn(true);
 
       // Store token and user data in localStorage
       localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('user', JSON.stringify(user));
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -100,14 +75,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const register = async (username: string, email: string, password: string) => {
     try {
+      // Use mock API for now
+      await mockApi.auth.register(username, email, password);
+
+      // In the future, uncomment this to use the real API
       // const response = await post<User>('/users', { username, email, password });
-      //
       // if (response.error || !response.data) {
       //   throw new Error(response.error || 'Registration failed');
       // }
-      //
-      // // After successful registration, log the user in
 
+      // After successful registration, log the user in
       await login(email, password);
     } catch (error) {
       console.error('Registration error:', error);
