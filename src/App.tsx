@@ -15,7 +15,6 @@ import OrderDetail from "./pages/Orders/OrderDetail";
 import UserDashboard from "./pages/User/UserDashboard";
 import UserOrders from "./pages/Orders/UserOrders";
 import UserAccount from "./pages/User/UserAccount";
-import UserAddresses from "./pages/User/UserAddresses";
 import UserPayments from "./pages/User/UserPayments";
 import Login from "./pages/User/Login";
 import Register from "./pages/User/Register";
@@ -55,7 +54,6 @@ function App() {
               <Route index element={<UserDashboard />} /> {/* Stage 1. User */}
               <Route path="orders" element={<UserOrders />} /> {/* Stage 3. Order */}
               <Route path="account" element={<UserAccount />} /> {/* Stage 1. User */}
-              <Route path="addresses" element={<UserAddresses />} /> {/* Stage 1. User */}
               <Route path="payments" element={<UserPayments />} /> {/* Stage 3. Order */}
             </Route>
             <Route path="login" element={<Login />} /> {/* Stage 1. User */}

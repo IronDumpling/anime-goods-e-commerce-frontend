@@ -1,17 +1,22 @@
 import { useEffect, useState, useRef } from "react";
 
 import ProtectedRoute from "@/components/layout/ProtectedRoute";
-// import NotificationPopover from "@/components/layout/NotificationPopover";
-
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
-
 import { cn } from "@/lib/utils";
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-type EditType = "name" | "email" | "phone" | "password" | null;
+type EditType = "name" | "email" | "phone" | "password" | "address" | null;
+
+type Address = {
+  address: string;
+  unit?: string;
+  city: string;
+  province: string;
+  postal: string;
+};
 
 function UserAccount() {
   const navigate = useNavigate();
@@ -20,17 +25,28 @@ function UserAccount() {
   const [userData, setUserData] = useState({
     name: "",
     email: "",
-    phone: ""
+    phone: "",
+    address: "",
+    unit: "",
+    city: "",
+    province: "",
+    postal: ""
   });
 
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     async function fetchUserData() {
+      // Placeholder fetch logic for future backend integration
       setUserData({
         name: "Charlie Zhang",
         email: "irondumpling010@gmail.com",
-        phone: "+14373438066"
+        phone: "+14373438066",
+        address: "180 Enterprise Blvd",
+        unit: "Unit 302",
+        city: "Markham",
+        province: "Ontario",
+        postal: "L6G 0G4",
       });
     }
     fetchUserData();
@@ -50,17 +66,31 @@ function UserAccount() {
   const handleSave = () => {
     if (!inputRef.current || !visibleField) return;
     const newValue = inputRef.current.value.trim();
-    // if (newValue === userData[visibleField]) {
-    //   setShowNotification(true);
-    //   setTimeout(() => setShowNotification(false), 3000);
-    //   return;
-    // }
     setUserData((prev) => ({ ...prev, [visibleField]: newValue }));
     closeEdit();
   };
 
   const EditPanel = () => {
     if (!visibleField) return null;
+
+    if (visibleField === "address") {
+      return (
+        <Card className="w-full max-w-md p-6">
+          <h3 className="text-lg font-medium mb-4">Edit Address</h3>
+          <div className="grid gap-3">
+            <Input placeholder="Street Address" defaultValue={userData.address} />
+            <Input placeholder="Unit (optional)" defaultValue={userData.unit} />
+            <Input placeholder="City" defaultValue={userData.city} />
+            <Input placeholder="Province" defaultValue={userData.province} />
+            <Input placeholder="Postal code" defaultValue={userData.postal} />
+          </div>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="outline" onClick={closeEdit}>Cancel</Button>
+            <Button>Save</Button>
+          </div>
+        </Card>
+      );
+    }
 
     const fieldLabel =
       visibleField === "name"
@@ -124,7 +154,7 @@ function UserAccount() {
             visibleField ? "md:ml-0" : "md:mx-auto"
           )}>
             <div className="p-6">
-              <h2 className="text-2xl font-bold mb-6">Login & Security</h2>
+              <h2 className="text-2xl font-bold mb-6">Account</h2>
 
               <div className="mb-6 border-b pb-4 flex justify-between items-center">
                 <div>
@@ -150,12 +180,23 @@ function UserAccount() {
                 <Button variant="outline" onClick={() => setEditField("phone")}>Edit</Button>
               </div>
 
-              <div className="flex justify-between items-center">
+              <div className="mb-6 border-b pb-4 flex justify-between items-center">
                 <div>
                   <h4 className="font-medium text-sm text-left">Password</h4>
                   <p className="text-muted-foreground text-sm text-left">********</p>
                 </div>
                 <Button variant="outline" onClick={() => setEditField("password")}>Edit</Button>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <div>
+                  <h4 className="font-medium text-sm text-left">Address</h4>
+                  <p className="text-muted-foreground text-sm text-left">
+                    {userData.address}{userData.unit ? ", " + userData.unit : ""}<br />
+                    {userData.city}, {userData.province} {userData.postal}
+                  </p>
+                </div>
+                <Button variant="outline" onClick={() => setEditField("address")}>Edit</Button>
               </div>
             </div>
           </Card>
