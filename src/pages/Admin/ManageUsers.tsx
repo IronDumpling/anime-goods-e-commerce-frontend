@@ -227,7 +227,7 @@ const ManageUsers: React.FC = () => {
   return (
     <ProtectedRoute accessLevel="admin">
       <div className="container mx-auto py-10">
-        <h1 className="text-2xl font-bold mb-6">Manage Users</h1>
+        <h1 className="text-2xl font-bold mb-6">Manage Accounts</h1>
         <div className="w-full">
           <div className="flex items-center py-4">
             <Input
