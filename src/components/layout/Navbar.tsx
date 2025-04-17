@@ -119,22 +119,22 @@ export default function Navbar() {
               Dashboard
             </Link>
             <Link
+              to="/admin/orders"
+              className="block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground text-sm"
+            >
+              Manage Orders
+            </Link>
+            <Link
               to="/admin/users"
               className="block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground text-sm"
             >
-              Manage Users
+              Manage Accounts
             </Link>
             <Link
               to="/admin/products"
               className="block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground text-sm"
             >
               Manage Products
-            </Link>
-            <Link
-              to="/admin/orders"
-              className="block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground text-sm"
-            >
-              Manage Orders
             </Link>
             <Button
               className="w-full"
@@ -183,7 +183,7 @@ export default function Navbar() {
           <NavigationMenuList className="flex items-center gap-6">
             {/* Logo/Brand */}
             <NavigationMenuItem>
-              <Link to="/">
+              <Link to="/products">
                 AnimeGoods
               </Link>
             </NavigationMenuItem>
