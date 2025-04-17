@@ -58,7 +58,7 @@ function App() {
 
             {/* Admin Routes */}
             <Route path="admin">
-              <Route index element={<AdminDashboard />} /> {/* Stage 1. User Chuyue */}
+              <Route index element={<AdminDashboard />} />
               <Route path="users" element={<ManageUsers />} /> {/* Stage 1. User Yushun */}
               <Route path="products" element={<ManageProducts />} /> {/* Stage 2. Product Yushun */}
               <Route path="orders" element={<ManageOrders />} /> {/* Stage 3. Order Chuyue */}
