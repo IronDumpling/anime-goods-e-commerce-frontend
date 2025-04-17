@@ -6,7 +6,7 @@ const AdminDashboard: React.FC = () => {
   return (
     <ProtectedRoute accessLevel="admin">
       <div className="container mx-auto px-4 py-10">
-        <h1 className="text-3xl font-bold mb-8 text-center">Your Account</h1>
+        <h1 className="text-3xl font-bold mb-8 text-center">Management Dashboard</h1>
         <div className="flex justify-center">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl w-full">
             <UserDashboardCard
