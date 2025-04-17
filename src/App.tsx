@@ -47,7 +47,7 @@ function App() {
             </Route>
 
             {/* User Account Routes */}
-            <Route path="user">
+            <Route path="user/:userId">
               <Route index element={<UserDashboard />} /> 
               <Route path="orders" element={<UserOrders />} /> {/* Stage 3. Order Chuyue */}
               <Route path="account" element={<UserAccount />} /> 

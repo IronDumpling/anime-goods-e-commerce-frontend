@@ -58,6 +58,8 @@ const getProductCategoryComponents = (categories: ProductCategory[]) => {
 export default function Navbar() {
   const { toggleTheme } = useTheme();
   const { isLoggedIn, username, isAdmin, logout } = useAuth();
+  const { user } = useAuth(); 
+  const userId = user?.id;
   const navigate = useNavigate();
   const location = useLocation();
   const [categories, setCategories] = useState<ProductCategory[]>([]);
@@ -154,13 +156,13 @@ export default function Navbar() {
         </div>
         <div className="grid gap-3">
           <Link
-            to="/user"
+            to={`/user/${userId}`}
             className="block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground text-sm"
           >
             Dashboard
           </Link>
           <Link
-            to="/user/orders"
+            to={`/user/${userId}/orders`}
             className="block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground text-sm"
           >
             Orders
