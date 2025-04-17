@@ -14,7 +14,7 @@ import OrderDetail from "./pages/Orders/OrderDetail";
 
 import UserDashboard from "./pages/User/UserDashboard";
 import UserOrders from "./pages/Orders/UserOrders";
-import UserSecurity from "./pages/User/UserSecurity";
+import UserAccount from "./pages/User/UserAccount";
 import UserAddresses from "./pages/User/UserAddresses";
 import UserPayments from "./pages/User/UserPayments";
 import Login from "./pages/User/Login";
@@ -32,43 +32,43 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <Routes>
-        <Route path="/" element={<Layout />}> {/* Stage 2. Product */}
-        <Route index element={<Home />} /> {/* Stage 2. Product */}
+          <Route path="/" element={<Layout />}> {/* Stage 2. Product */}
+            <Route index element={<Home />} /> {/* Stage 2. Product */}
 
-        {/* Product Routes */}
-        <Route path="products">
-          <Route index element={<ProductList />} /> {/* Stage 2. Product */}
-          <Route path=":productId" element={<ProductDetail />} /> {/* Stage 2. Product */}
-        </Route>
+            {/* Product Routes */}
+            <Route path="products">
+              <Route index element={<ProductList />} /> {/* Stage 2. Product */}
+              <Route path=":productId" element={<ProductDetail />} /> {/* Stage 2. Product */}
+            </Route>
 
-        {/* Cart & Checkout */}
-        <Route path="cart" element={<Cart />} /> {/* Stage 2. Product */}
-        <Route path="checkout" element={<Checkout />} /> {/* Stage 2. Product */}
+            {/* Cart & Checkout */}
+            <Route path="cart" element={<Cart />} /> {/* Stage 2. Product */}
+            <Route path="checkout" element={<Checkout />} /> {/* Stage 2. Product */}
 
-        {/* Orders */}
-        <Route path="orders">
-          <Route path=":orderId" element={<OrderDetail />} /> {/* Stage 3. Order */}
-        </Route>
+            {/* Orders */}
+            <Route path="orders">
+              <Route path=":orderId" element={<OrderDetail />} /> {/* Stage 3. Order */}
+            </Route>
 
-        {/* User Account Routes */}
-        <Route path="user">
-          <Route path="/user" element={<UserDashboard />} /> {/* Stage 1. User */}
-          <Route path="/user/orders" element={<UserOrders />} /> {/* Stage 3. Order */}
-          <Route path="/user/account" element={<UserSecurity />} /> {/* Stage 1. User */}
-          <Route path="/user/addresses" element={<UserAddresses />} /> {/* Stage 1. User */}
-          <Route path="/user/payments" element={<UserPayments />} /> {/* Stage 3. Order */}
-        </Route>
-        <Route path="login" element={<Login />} /> {/* Stage 1. User */}
-        <Route path="register" element={<Register />} /> {/* Stage 1. User */}
+            {/* User Account Routes */}
+            <Route path="user">
+              <Route index element={<UserDashboard />} /> {/* Stage 1. User */}
+              <Route path="orders" element={<UserOrders />} /> {/* Stage 3. Order */}
+              <Route path="account" element={<UserAccount />} /> {/* Stage 1. User */}
+              <Route path="addresses" element={<UserAddresses />} /> {/* Stage 1. User */}
+              <Route path="payments" element={<UserPayments />} /> {/* Stage 3. Order */}
+            </Route>
+            <Route path="login" element={<Login />} /> {/* Stage 1. User */}
+            <Route path="register" element={<Register />} /> {/* Stage 1. User */}
 
-        {/* Admin Routes */}
-        <Route path="admin">
-          <Route index element={<AdminDashboard />} /> {/* Stage 1. User */}
-          <Route path="users" element={<ManageUsers />} /> {/* Stage 1. User */}
-          <Route path="products" element={<ManageProducts />} /> {/* Stage 2. Product */}
-          <Route path="orders" element={<ManageOrders />} /> {/* Stage 3. Order */}
-        </Route>
-      </Route>
+            {/* Admin Routes */}
+            <Route path="admin">
+              <Route index element={<AdminDashboard />} /> {/* Stage 1. User */}
+              <Route path="users" element={<ManageUsers />} /> {/* Stage 1. User */}
+              <Route path="products" element={<ManageProducts />} /> {/* Stage 2. Product */}
+              <Route path="orders" element={<ManageOrders />} /> {/* Stage 3. Order */}
+            </Route>
+          </Route>
         </Routes>
       </AuthProvider>
     </ThemeProvider>

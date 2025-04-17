@@ -1,5 +1,11 @@
-function ManageUsers() {
-    return <div>Product Detail Page</div>;
-  }
+import React from 'react';
+import ProtectedRoute from '@/components/layout/ProtectedRoute';
 
-export default ManageUsers
+const ManageUsers: React.FC = () => {
+  return (
+    <ProtectedRoute accessLevel="admin">
+    </ProtectedRoute>
+  );
+};
+
+export default ManageUsers;
