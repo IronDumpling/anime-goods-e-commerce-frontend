@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
 import { ArrowLeft } from "lucide-react";
-import {  useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 type EditType = "name" | "email" | "phone" | "password" | "address" | null;
 

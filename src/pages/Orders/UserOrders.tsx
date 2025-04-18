@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import { ArrowLeft } from "lucide-react";
+
 import { useAuth } from '@/context/AuthContext';
 import { mockApi, Order } from '@/lib/mock';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -7,6 +9,8 @@ import { Badge } from '@/components/ui/Badge';
 
 function UserOrders() {
   const { user } = useAuth();
+  const { userId } = useParams();
+  const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -63,6 +67,12 @@ function UserOrders() {
 
   return (
     <div className="container mx-auto px-4 py-10">
+      <button
+        className="flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
+        onClick={() => navigate(`/user/${userId}`)}
+      >
+        <ArrowLeft className="h-4 w-4 mr-2" /> Back to User Page
+      </button>
       <h1 className="text-2xl font-bold mb-6">Your Orders</h1>
       <div className="space-y-6">
         {orders.map((order) => (
