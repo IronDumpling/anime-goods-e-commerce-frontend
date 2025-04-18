@@ -1,7 +1,10 @@
 import UserDashboardCard from "@/components/layout/UserDashboardCard";
 import ProtectedRoute from "@/components/layout/ProtectedRoute";
+import { useParams } from 'react-router-dom';
 
 function UserDashboard() {
+  const { userId } = useParams();
+
   return (
     <ProtectedRoute accessLevel="user">
       <div className="container mx-auto px-4 py-10">
@@ -11,17 +14,17 @@ function UserDashboard() {
             <UserDashboardCard
               title="Your Orders"
               description="Track, return, or buy again"
-              to="/user/orders"
+              to={`/user/${userId}/orders`}
             />
             <UserDashboardCard
               title="Account"
               description="Update password, name, address, or delete account"
-              to="/user/account"
+              to={`/user/${userId}/account`}
             />
             <UserDashboardCard
               title="Your Payments"
               description="Manage your payment methods"
-              to="/user/payments"
+              to={`/user/${userId}/payments`}
             />
           </div>
         </div>

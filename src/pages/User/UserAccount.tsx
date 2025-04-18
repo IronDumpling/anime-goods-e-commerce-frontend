@@ -6,19 +6,12 @@ import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
 import { ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import {  useParams, useNavigate } from "react-router-dom";
 
 type EditType = "name" | "email" | "phone" | "password" | "address" | null;
 
-type Address = {
-  address: string;
-  unit?: string;
-  city: string;
-  province: string;
-  postal: string;
-};
-
 function UserAccount() {
+  const { userId } = useParams();
   const navigate = useNavigate();
   const [editField, setEditField] = useState<EditType>(null);
   const [visibleField, setVisibleField] = useState<EditType>(null);
@@ -138,7 +131,7 @@ function UserAccount() {
       <div className="container mx-auto px-4 py-10">
         <button
           className="flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
-          onClick={() => navigate("/user")}
+          onClick={() => navigate(`/user/${userId}`)}
         >
           <ArrowLeft className="h-4 w-4 mr-2" /> Back to User Page
         </button>
