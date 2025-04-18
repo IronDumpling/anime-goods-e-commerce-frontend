@@ -4,6 +4,8 @@ import { useTheme } from "../../context/ThemeContext";
 import { Input } from "@/components/ui/Input";
 import { useAuth } from "@/context/AuthContext";
 import { mockApi, ProductCategory } from "@/lib/mock";
+import { useSearchParams } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 import {
   NavigationMenu,
@@ -15,7 +17,6 @@ import {
 } from "@/components/ui/navigation-menu";
 
 import { ShoppingCart, User } from "lucide-react";
-import { useState, useEffect } from "react";
 
 const getProductCategoryComponents = (categories: ProductCategory[]) => {
   return (
@@ -58,11 +59,40 @@ const getProductCategoryComponents = (categories: ProductCategory[]) => {
 export default function Navbar() {
   const { toggleTheme } = useTheme();
   const { isLoggedIn, username, isAdmin, logout } = useAuth();
-  const { user } = useAuth(); 
+  const { user } = useAuth();
   const userId = user?.id;
   const navigate = useNavigate();
   const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [searchValue, setSearchValue] = useState(searchParams.get('search') || '');
   const [categories, setCategories] = useState<ProductCategory[]>([]);
+
+  const isProductsPage = location.pathname === '/products';
+
+  const handleSearch = (value: string) => {
+    setSearchValue(value);
+    if (isProductsPage) {
+      const newParams = new URLSearchParams(searchParams);
+      if (value) {
+        newParams.set('search', value);
+      } else {
+        newParams.delete('search');
+      }
+      setSearchParams(newParams);
+    }
+  };
+
+  const handleSearchSubmit = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      if (!isProductsPage) {
+        const newParams = new URLSearchParams();
+        if (searchValue) {
+          newParams.set('search', searchValue);
+        }
+        navigate(`/products${searchValue ? `?${newParams.toString()}` : ''}`);
+      }
+    }
+  };
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -206,7 +236,10 @@ export default function Navbar() {
         <div className="flex-1 mx-4">
           <Input
             type="search"
-            placeholder="Search..."
+            placeholder="Search products..."
+            value={searchValue}
+            onChange={(e) => handleSearch(e.target.value)}
+            onKeyDown={handleSearchSubmit}
           />
         </div>
 

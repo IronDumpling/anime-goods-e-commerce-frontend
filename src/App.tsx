@@ -36,8 +36,8 @@ function App() {
 
             {/* Product Routes */}
             <Route path="products">
-              <Route index element={<ProductList />} /> {/* Yushun */}
-              <Route path=":productId" element={<ProductDetail />} /> {/* Yushun */}
+              <Route index element={<ProductList />} /> {/* Yushun: add cart + buy now logic */}
+              <Route path=":productId" element={<ProductDetail />} /> {/* Yushun: add cart + buy now logic */}
             </Route>
 
             {/* Cart & Checkout */}
@@ -62,7 +62,7 @@ function App() {
             {/* Admin Routes */}
             <Route path="admin">
               <Route index element={<AdminDashboard />} />
-              <Route path="users" element={<ManageUsers />} /> {/* Stage 1. User Yushun */}
+              <Route path="users" element={<ManageUsers />} /> {/* Stage 1. User Yushun: functionality */}
               <Route path="products" element={<ManageProducts />} /> {/* Stage 2. Product Yushun */}
               <Route path="orders" element={<ManageOrders />} /> {/* Stage 3. Order Chuyue */}
             </Route>
