@@ -1,7 +1,6 @@
-import { Routes, Route } from "react-router-dom";
-import { ThemeProvider } from "./context/ThemeContext";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
-
+import { CartProvider } from './context/CartContext';
 import Layout from "./components/layout/Layout";
 
 import ProductList from "./pages/Products/ProductList";
@@ -27,14 +26,17 @@ import './App.css'
 
 function App() {
   return (
-    <ThemeProvider>
+    <CartProvider>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<Layout />}> 
+          <Route path="/" element={<Layout />}>
+            {/* Redirect root to products */}
+            <Route index element={<Navigate to="/products" replace />} />
+
             {/* Product Routes */}
             <Route path="products">
-              <Route index element={<ProductList />} /> {/* Yushun */}
-              <Route path=":productId" element={<ProductDetail />} /> {/* Yushun */}
+              <Route index element={<ProductList />} /> {/* Yushun: add cart + buy now logic */}
+              <Route path=":productId" element={<ProductDetail />} /> {/* Yushun: add cart + buy now logic */}
             </Route>
 
             {/* Cart & Checkout */}
@@ -48,9 +50,9 @@ function App() {
 
             {/* User Account Routes */}
             <Route path="user/:userId">
-              <Route index element={<UserDashboard />} /> 
+              <Route index element={<UserDashboard />} />
               <Route path="orders" element={<UserOrders />} /> {/* Stage 3. Order Chuyue */}
-              <Route path="account" element={<UserAccount />} /> 
+              <Route path="account" element={<UserAccount />} />
               <Route path="payments" element={<UserPayments />} /> {/* Stage 3. Order Chuyue */}
             </Route>
             <Route path="login" element={<Login />} />
@@ -59,14 +61,14 @@ function App() {
             {/* Admin Routes */}
             <Route path="admin">
               <Route index element={<AdminDashboard />} />
-              <Route path="users" element={<ManageUsers />} /> {/* Stage 1. User Yushun */}
+              <Route path="users" element={<ManageUsers />} /> {/* Stage 1. User Yushun: functionality */}
               <Route path="products" element={<ManageProducts />} /> {/* Stage 2. Product Yushun */}
               <Route path="orders" element={<ManageOrders />} /> {/* Stage 3. Order Chuyue */}
             </Route>
           </Route>
         </Routes>
       </AuthProvider>
-    </ThemeProvider>
+    </CartProvider>
   )
 }
 
