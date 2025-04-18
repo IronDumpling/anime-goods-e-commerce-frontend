@@ -186,7 +186,7 @@ const ManageUsers: React.FC = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const data = await mockApi.users.getAll();
+        const data = await '/api/user/allCustomers';
         setUsers(data);
       } catch (error) {
         console.error('Error fetching users:', error);

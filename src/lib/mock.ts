@@ -1,11 +1,11 @@
 // Types
 export interface User {
   id: number;
-  username: string;
+  firstName: string;
+  lastName: string;
   email: string;
-  role: "admin" | "user";
-  status: "active" | "inactive";
-  createdAt: string;
+  address: string;
+  isAdmin: boolean;
 }
 
 // Internal type for user data with password

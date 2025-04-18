@@ -7,7 +7,8 @@ import { useAuth } from "@/context/AuthContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 function Register() {
-  const [username, setUsername] = useState("");
+  const [firstname, setFirstname] = useState("");
+  const [lastname, setLastname] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -25,7 +26,7 @@ function Register() {
     }
 
     try {
-      await register(username, email, password);
+      await register(firstname, lastname, email, password);
       navigate('/');
     } catch (err) {
       setError("Registration failed. Please try again.");

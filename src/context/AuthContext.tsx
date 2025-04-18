@@ -18,14 +18,15 @@ interface AuthContextType {
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  register: (username: string, email: string, password: string) => Promise<void>;
+  register: (firstname: string, lastname: string, email: string, password: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [username, setUsername] = useState<string | null>(null);
+  const [firstname, setFirstname] = useState<string | null>(null);
+  const [lastname, setLastname] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -39,7 +40,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const userData = JSON.parse(storedUser);
       setToken(storedToken);
       setUser(userData);
-      setUsername(userData.username);
+      setFirstname(userData.firstName);
+      setLastname(userData.lastName);
       setIsAdmin(userData.role === 'admin');
       setIsLoggedIn(true);
     }
@@ -48,7 +50,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       // Use mock API for now
-      const { token, user } = await mockApi.auth.login(email, password);
+      console.log("email," + email + " password" + password);
+      const res = await fetch('/api/user/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({email, password})
+      });
 
       // In the future, uncomment this to use the real API
       // const response = await post<LoginResponse>('/auth/login', { email, password });
@@ -57,15 +66,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // }
       // const { token, id, username, email: userEmail, role } = response.data;
       // const userData: User = { id, username, email: userEmail, role };
+      
+      if (!res.ok) {
+        console.error("wrong user");
+        return;
+      }
+      const user: User = await res.json(); 
 
-      setToken(token);
+      // setToken(token);
       setUser(user);
-      setUsername(user.username);
-      setIsAdmin(user.role === 'admin');
+      setFirstname(user.firstName);
+      setLastname(user.lastName);
+      setIsAdmin(user.isAdmin === true);
       setIsLoggedIn(true);
 
       // Store token and user data in localStorage
-      localStorage.setItem('token', token);
+      // localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(user));
     } catch (error) {
       console.error('Login error:', error);
@@ -73,10 +89,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (username: string, email: string, password: string) => {
+  const register = async (firstname: string, lastname: string, email: string, password: string) => {
     try {
       // Use mock API for now
-      await mockApi.auth.register(username, email, password);
+      // await mockApi.auth.register(firstname, lastname, email, password);
 
       // In the future, uncomment this to use the real API
       // const response = await post<User>('/users', { username, email, password });
@@ -94,7 +110,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     setIsLoggedIn(false);
-    setUsername(null);
+    setFirstname(null);
+    setLastname(null);
     setIsAdmin(false);
     setToken(null);
     setUser(null);
@@ -103,7 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, username, isAdmin, token, user, login, logout, register }}>
+    <AuthContext.Provider value={{ isLoggedIn, firstname, lastname, isAdmin, token, user, login, logout, register }}>
       {children}
     </AuthContext.Provider>
   );
