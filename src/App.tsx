@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
 import { AuthProvider } from "./context/AuthContext";
 
@@ -30,7 +30,10 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <Routes>
-          <Route path="/" element={<Layout />}> 
+          <Route path="/" element={<Layout />}>
+            {/* Redirect root to products */}
+            <Route index element={<Navigate to="/products" replace />} />
+
             {/* Product Routes */}
             <Route path="products">
               <Route index element={<ProductList />} /> {/* Yushun */}
@@ -48,9 +51,9 @@ function App() {
 
             {/* User Account Routes */}
             <Route path="user/:userId">
-              <Route index element={<UserDashboard />} /> 
+              <Route index element={<UserDashboard />} />
               <Route path="orders" element={<UserOrders />} /> {/* Stage 3. Order Chuyue */}
-              <Route path="account" element={<UserAccount />} /> 
+              <Route path="account" element={<UserAccount />} />
               <Route path="payments" element={<UserPayments />} /> {/* Stage 3. Order Chuyue */}
             </Route>
             <Route path="login" element={<Login />} />
