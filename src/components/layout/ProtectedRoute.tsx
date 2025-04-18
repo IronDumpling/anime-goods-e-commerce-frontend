@@ -1,9 +1,9 @@
 import React from 'react';
 import { useAuth } from '@/context/AuthContext';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import HttpError from './HttpError';
 
-type AccessLevel = 'user' | 'admin';
+type AccessLevel = 'self' | 'user' | 'admin' | 'self-and-admin';
 
 interface ProtectedRouteProps {
   children?: React.ReactNode;
@@ -16,9 +16,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   accessLevel,
   fallbackPath
 }) => {
-  const { isLoggedIn, isAdmin } = useAuth();
+  const { isLoggedIn, isAdmin, user } = useAuth();
   const location = useLocation();
   const currentPath = location.pathname;
+  const { userId } = useParams();
 
   // If not logged in, show 401 error
   if (!isLoggedIn) {
@@ -28,6 +29,20 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // If admin access is required but user is not an admin, show 403 error
   if (accessLevel === 'admin' && !isAdmin) {
     return <HttpError code={403} />;
+  }
+
+  // If the access is the user itself
+  if (accessLevel === 'self') {
+    if (!userId || String(user?.id) !== userId) {
+      return <HttpError code={403} />;
+    }
+  }
+
+  // If the access is only the user itself and admin
+  if (accessLevel === 'self-and-admin') {
+    if (!isAdmin && (!userId || String(user?.id) !== userId)) {
+      return <HttpError code={403} />;
+    }
   }
 
   // If we have a fallback path and the user doesn't have access, redirect to that path

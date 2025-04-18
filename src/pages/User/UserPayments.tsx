@@ -30,7 +30,7 @@ const UserPayments: React.FC = () => {
   };
 
   return (
-    <ProtectedRoute accessLevel="user">
+    <ProtectedRoute accessLevel="self">
       <div className="container mx-auto px-4 py-10">
         <h1 className="text-3xl font-bold mb-6">Manage Payment Methods</h1>
 

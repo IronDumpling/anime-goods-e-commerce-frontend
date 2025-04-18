@@ -127,7 +127,7 @@ function UserAccount() {
   };
 
   return (
-    <ProtectedRoute accessLevel="user">
+    <ProtectedRoute accessLevel="self">
       <div className="container mx-auto px-4 py-10">
         <button
           className="flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
