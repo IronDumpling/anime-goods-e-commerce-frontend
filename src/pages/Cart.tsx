@@ -1,94 +1,34 @@
-import { useState, useEffect } from 'react';
-import { CartListEntry } from '@/components/layout/CartListEntry';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { mockApi, Product } from '@/lib/mock';
+import { CartListEntry } from '@/components/layout/CartListEntry';
 import { Trash2 } from 'lucide-react';
-
-interface CartItem {
-  product: Product;
-  quantity: number;
-  selected: boolean;
-}
+import { useCart } from '@/context/CartContext';
 
 function Cart() {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    items: cartItems,
+    updateQuantity,
+    updateSelected,
+    removeItem,
+    selectAll,
+    removeSelected,
+  } = useCart();
 
-  // Mock data for demonstration
-  useEffect(() => {
-    const fetchCartItems = async () => {
-      try {
-        // In a real app, this would fetch from an API
-        const products = await mockApi.products.getAll();
-        // For demo, add first 3 products to cart
-        const items = products.slice(0, 3).map(product => ({
-          product,
-          quantity: Math.floor(Math.random() * 5) + 1,
-          selected: false
-        }));
-        setCartItems(items);
-      } catch (err) {
-        setError('Failed to load cart items');
-        console.error('Error fetching cart items:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchCartItems();
-  }, []);
-
-  const handleQuantityChange = (productId: number, quantity: number) => {
-    setCartItems(prev =>
-      prev.map(item =>
-        item.product.id === productId ? { ...item, quantity } : item
-      )
-    );
-  };
-
-  const handleSelectChange = (productId: number, selected: boolean) => {
-    setCartItems(prev =>
-      prev.map(item =>
-        item.product.id === productId ? { ...item, selected } : item
-      )
-    );
-  };
-
-  const handleRemove = (productId: number) => {
-    setCartItems(prev => prev.filter(item => item.product.id !== productId));
-  };
-
-  const handleSelectAll = (selected: boolean) => {
-    setCartItems(prev => prev.map(item => ({ ...item, selected })));
-  };
-
-  const handleRemoveSelected = () => {
-    setCartItems(prev => prev.filter(item => !item.selected));
-  };
-
+  console.log(cartItems);
+  // Filter selected items and calculate totals
   const selectedItems = cartItems.filter(item => item.selected);
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
   const selectedItemsCount = selectedItems.length;
 
-  if (isLoading) {
-    return (
-      <div className="container mx-auto px-4 py-10">
-        <div className="text-center">Loading cart...</div>
-      </div>
-    );
-  }
+  // Calculate totals for selected items
+  const selectedTotalItems = selectedItems.reduce((sum, item) => sum + item.quantity, 0);
+  const selectedTotalPrice = selectedItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
 
-  if (error) {
-    return (
-      <div className="container mx-auto px-4 py-10">
-        <div className="text-center text-red-500">{error}</div>
-      </div>
-    );
-  }
+  // Use selected items' totals if any items are selected, otherwise use all items' totals
+  const displayTotalItems = selectedItems.length > 0 ? selectedTotalItems : totalItems;
+  const displayTotalPrice = selectedItems.length > 0 ? selectedTotalPrice : totalPrice;
 
   return (
     <div className="container mx-auto px-4 py-10">
@@ -103,7 +43,7 @@ function Cart() {
               <Checkbox
                 id="select-all"
                 checked={cartItems.length > 0 && cartItems.every(item => item.selected)}
-                onCheckedChange={(checked) => handleSelectAll(checked as boolean)}
+                onCheckedChange={(checked) => selectAll(checked as boolean)}
               />
               <label htmlFor="select-all" className="text-sm font-medium">
                 Select All ({cartItems.length})
@@ -114,7 +54,7 @@ function Cart() {
               size="sm"
               className="text-destructive"
               disabled={selectedItemsCount === 0}
-              onClick={handleRemoveSelected}
+              onClick={removeSelected}
             >
               <Trash2 className="h-4 w-4 mr-2" />
               Remove Selected ({selectedItemsCount})
@@ -130,9 +70,9 @@ function Cart() {
                   product={item.product}
                   quantity={item.quantity}
                   selected={item.selected}
-                  onQuantityChange={handleQuantityChange}
-                  onSelectChange={handleSelectChange}
-                  onRemove={handleRemove}
+                  onQuantityChange={updateQuantity}
+                  onSelectChange={updateSelected}
+                  onRemove={removeItem}
                 />
               ))
             ) : (
@@ -150,8 +90,10 @@ function Cart() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Items ({totalItems})</span>
-              <span>${totalPrice.toFixed(2)}</span>
+              <span className="text-muted-foreground">
+                {selectedItems.length > 0 ? 'Selected Items' : 'Items'} ({displayTotalItems})
+              </span>
+              <span>${displayTotalPrice.toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Shipping</span>
@@ -159,10 +101,13 @@ function Cart() {
             </div>
             <div className="border-t pt-2 flex justify-between font-bold">
               <span>Total</span>
-              <span>${totalPrice.toFixed(2)}</span>
+              <span>${displayTotalPrice.toFixed(2)}</span>
             </div>
-            <Button className="w-full" disabled={cartItems.length === 0}>
-              Checkout
+            <Button
+              className="w-full"
+              disabled={cartItems.length === 0 || (selectedItems.length > 0 && selectedTotalItems === 0)}
+            >
+              Checkout {selectedItems.length > 0 ? `(${selectedTotalItems} items)` : ''}
             </Button>
           </CardContent>
         </Card>

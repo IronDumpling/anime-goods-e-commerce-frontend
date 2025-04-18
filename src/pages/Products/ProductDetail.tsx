@@ -1,23 +1,23 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
 import { mockApi, Product } from '@/lib/mock';
-import { ImageOff } from 'lucide-react';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { ImageOff, ShoppingCart } from 'lucide-react';
+import { useCart } from '@/context/CartContext';
 
 function ProductDetail() {
-  const { productId } = useParams<{ productId: string }>();
+  const { productId } = useParams();
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [imageError, setImageError] = useState(false);
+  const { addItem } = useCart();
 
   useEffect(() => {
     const fetchProduct = async () => {
-      if (!productId) return;
-
       try {
-        const data = await mockApi.products.getById(parseInt(productId));
+        const data = await mockApi.products.getById(Number(productId));
         if (data) {
           setProduct(data);
         } else {
@@ -70,7 +70,7 @@ function ProductDetail() {
         <div>
           <h1 className="text-3xl font-bold mb-2">{product.title}</h1>
           <Badge className="mb-4">{product.category}</Badge>
-          <p className="text-2xl font-bold text-primary mb-4">${product.price}</p>
+          <p className="text-2xl font-bold text-primary mb-4">${product.price.toFixed(2)}</p>
           <p className="text-muted-foreground mb-6">{product.description}</p>
           <div className="mb-4">
             <span className="font-medium">Stock: </span>
@@ -82,7 +82,12 @@ function ProductDetail() {
             <Button
               className="flex-1"
               disabled={product.stock === 0}
+              onClick={() => {
+                console.log("Add to Cart!");
+                addItem(product);
+              }}
             >
+              <ShoppingCart className="mr-2 h-5 w-5" />
               Add to Cart
             </Button>
             <Button

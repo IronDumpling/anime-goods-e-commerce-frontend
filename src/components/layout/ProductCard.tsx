@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Link } from 'react-router-dom';
 import { ImageOff, ShoppingCart } from 'lucide-react';
+import { useCart } from '@/context/CartContext';
 
 interface ProductCardProps {
   product: Product;
@@ -11,6 +12,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const [imageError, setImageError] = useState(false);
+  const { addItem } = useCart();
 
   return (
     <div className="bg-card text-card-foreground rounded-xl border shadow-sm overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col">
@@ -49,6 +51,7 @@ export function ProductCard({ product }: ProductCardProps) {
           size="sm"
           className="text-primary-foreground"
           disabled={product.stock <= 0}
+          onClick={() => addItem(product)}
         >
           <ShoppingCart className="mr-2 h-4 w-4" />
           Add to Cart

@@ -1,7 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
-import { ThemeProvider } from "./context/ThemeContext";
 import { AuthProvider } from "./context/AuthContext";
-
+import { CartProvider } from './context/CartContext';
 import Layout from "./components/layout/Layout";
 
 import ProductList from "./pages/Products/ProductList";
@@ -27,7 +26,7 @@ import './App.css'
 
 function App() {
   return (
-    <ThemeProvider>
+    <CartProvider>
       <AuthProvider>
         <Routes>
           <Route path="/" element={<Layout />}>
@@ -69,7 +68,7 @@ function App() {
           </Route>
         </Routes>
       </AuthProvider>
-    </ThemeProvider>
+    </CartProvider>
   )
 }
 

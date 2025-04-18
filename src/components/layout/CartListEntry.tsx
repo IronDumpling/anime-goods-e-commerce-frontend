@@ -88,7 +88,7 @@ export function CartListEntry({
                 max={product.stock}
                 value={quantity}
                 onChange={(e) => handleQuantityChange(parseInt(e.target.value) || 1)}
-                className="w-12 h-8 text-center rounded-none border-x-0"
+                className="w-16 h-8 text-center rounded-none border-x [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               />
               <Button
                 variant="ghost"
