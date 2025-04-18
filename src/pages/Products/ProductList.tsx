@@ -3,14 +3,14 @@ import { useSearchParams } from 'react-router-dom';
 import { ProductCard } from '@/components/layout/ProductCard';
 import { ProductEntry } from '@/components/layout/ProductEntry';
 import { mockApi, Product, ProductCategory } from '@/lib/mock';
-import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Search, Filter, X, LayoutGrid, List } from 'lucide-react';
+import { Filter, X, LayoutGrid, List } from 'lucide-react';
+import { Input } from '@/components/ui/Input';
 
 interface FilterState {
   search: string;
@@ -59,18 +59,77 @@ function ProductList() {
     fetchData();
   }, []);
 
-  // Update URL params when filters change
+  // Update filters when URL params change
   useEffect(() => {
-    const params = new URLSearchParams();
-    if (filters.search) params.set('search', filters.search);
-    if (filters.minPrice > 0) params.set('minPrice', filters.minPrice.toString());
-    if (filters.maxPrice < 1000) params.set('maxPrice', filters.maxPrice.toString());
-    if (filters.categories.length > 0) params.set('categories', filters.categories.join(','));
-    if (filters.inStock) params.set('inStock', 'true');
-    if (filters.sortBy !== 'newest') params.set('sortBy', filters.sortBy);
-    if (filters.viewMode !== 'card') params.set('viewMode', filters.viewMode);
+    setFilters(prev => ({
+      ...prev,
+      search: searchParams.get('search') || '',
+      minPrice: Number(searchParams.get('minPrice')) || 0,
+      maxPrice: Number(searchParams.get('maxPrice')) || 1000,
+      categories: searchParams.get('categories')?.split(',') || [],
+      inStock: searchParams.get('inStock') === 'true',
+      sortBy: (searchParams.get('sortBy') as FilterState['sortBy']) || 'newest',
+      viewMode: (searchParams.get('viewMode') as FilterState['viewMode']) || 'card',
+    }));
+  }, [searchParams]);
+
+  // Update URL params when filters change (excluding search)
+  useEffect(() => {
+    const params = new URLSearchParams(searchParams);
+
+    // Handle minPrice
+    if (filters.minPrice > 0) {
+      params.set('minPrice', filters.minPrice.toString());
+    } else {
+      params.delete('minPrice');
+    }
+
+    // Handle maxPrice
+    if (filters.maxPrice < 1000) {
+      params.set('maxPrice', filters.maxPrice.toString());
+    } else {
+      params.delete('maxPrice');
+    }
+
+    // Handle categories
+    if (filters.categories.length > 0) {
+      params.set('categories', filters.categories.join(','));
+    } else {
+      params.delete('categories');
+    }
+
+    // Handle inStock
+    if (filters.inStock) {
+      params.set('inStock', 'true');
+    } else {
+      params.delete('inStock');
+    }
+
+    // Handle sortBy
+    if (filters.sortBy !== 'newest') {
+      params.set('sortBy', filters.sortBy);
+    } else {
+      params.delete('sortBy');
+    }
+
+    // Handle viewMode
+    if (filters.viewMode !== 'card') {
+      params.set('viewMode', filters.viewMode);
+    } else {
+      params.delete('viewMode');
+    }
+
     setSearchParams(params);
-  }, [filters, setSearchParams]);
+  }, [
+    filters.minPrice,
+    filters.maxPrice,
+    filters.categories,
+    filters.inStock,
+    filters.sortBy,
+    filters.viewMode,
+    searchParams,
+    setSearchParams
+  ]);
 
   // Filter and sort products
   const filteredProducts = products
@@ -130,20 +189,6 @@ function ProductList() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 overflow-y-auto">
-            {/* Search */}
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Search</label>
-              <div className="relative">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search products..."
-                  value={filters.search}
-                  onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                  className="pl-8"
-                />
-              </div>
-            </div>
-
             {/* Price Range */}
             <div className="space-y-1.5">
               <label className="text-sm font-medium">Price Range</label>
@@ -154,9 +199,30 @@ function ProductList() {
                 value={[filters.minPrice, filters.maxPrice]}
                 onValueChange={([min, max]) => setFilters(prev => ({ ...prev, minPrice: min, maxPrice: max }))}
               />
-              <div className="flex justify-between text-sm text-muted-foreground">
-                <span>${filters.minPrice}</span>
-                <span>${filters.maxPrice}</span>
+              <div className="flex justify-between items-center">
+                <Input
+                  type="number"
+                  min={0}
+                  max={1000}
+                  value={filters.minPrice}
+                  onChange={(e) => {
+                    const value = Math.min(Math.max(0, Number(e.target.value)), filters.maxPrice);
+                    setFilters(prev => ({ ...prev, minPrice: value }));
+                  }}
+                  className="w-24"
+                />
+                <span className="text-muted-foreground">-</span>
+                <Input
+                  type="number"
+                  min={filters.minPrice}
+                  max={1000}
+                  value={filters.maxPrice}
+                  onChange={(e) => {
+                    const value = Math.min(Math.max(filters.minPrice, Number(e.target.value)), 1000);
+                    setFilters(prev => ({ ...prev, maxPrice: value }));
+                  }}
+                  className="w-24"
+                />
               </div>
             </div>
 
@@ -207,6 +273,7 @@ function ProductList() {
               variant="outline"
               className="w-full mt-2"
               onClick={() => {
+                // Clear filters state
                 setFilters({
                   search: '',
                   minPrice: 0,
@@ -216,6 +283,8 @@ function ProductList() {
                   sortBy: 'newest',
                   viewMode: filters.viewMode,
                 });
+                // Clear URL parameters
+                setSearchParams(new URLSearchParams());
               }}
             >
               <X className="h-4 w-4 mr-2" />
