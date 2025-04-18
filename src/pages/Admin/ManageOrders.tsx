@@ -221,7 +221,7 @@ const ManageOrders: React.FC = () => {
           className="flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
           onClick={() => navigate(`/admin`)}
         >
-          <ArrowLeft className="h-4 w-4 mr-2" /> Back to User Page
+          <ArrowLeft className="h-4 w-4 mr-2" /> Back to Admin Page
         </button>
         <h1 className="text-2xl font-bold mb-6">Manage Orders</h1>
         <div className="w-full">
