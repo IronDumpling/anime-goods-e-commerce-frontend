@@ -4,7 +4,9 @@ import { ArrowLeft } from "lucide-react";
 
 import { useAuth } from '@/context/AuthContext';
 import { mockApi, Order } from '@/lib/mock';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import ProtectedRoute from "@/components/layout/ProtectedRoute";
 import { Badge } from '@/components/ui/Badge';
 
 function UserOrders() {
@@ -66,61 +68,63 @@ function UserOrders() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-10">
-      <button
-        className="flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
-        onClick={() => navigate(`/user/${userId}`)}
-      >
-        <ArrowLeft className="h-4 w-4 mr-2" /> Back to User Page
-      </button>
-      <h1 className="text-2xl font-bold mb-6">Your Orders</h1>
-      <div className="space-y-6">
-        {orders.map((order) => (
-          <Card key={order.id}>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Order #{order.id}</CardTitle>
-              <div className="flex items-center gap-2">
-                <Badge
-                  className={
-                    order.status === 'delivered' ? 'bg-green-500' :
-                    order.status === 'processing' ? 'bg-blue-500' :
-                    order.status === 'cancelled' ? 'bg-red-500' :
-                    'bg-yellow-500'
-                  }
-                >
-                  {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                </Badge>
-                <span className="text-sm text-muted-foreground">
-                  {new Date(order.createdAt).toLocaleDateString()}
-                </span>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {order.products.map((item) => (
-                  <div key={item.productId} className="flex justify-between">
-                    <span>Product #{item.productId} x {item.quantity}</span>
-                    <span>${(item.price * item.quantity).toFixed(2)}</span>
-                  </div>
-                ))}
-                <div className="border-t pt-2 mt-2 flex justify-between font-bold">
-                  <span>Total</span>
-                  <span>${order.total.toFixed(2)}</span>
+    <ProtectedRoute accessLevel="self">
+      <div className="container mx-auto px-4 py-10">
+        <button
+          className="flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
+          onClick={() => navigate(`/user/${userId}`)}
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" /> Back to User Page
+        </button>
+        <h1 className="text-2xl font-bold mb-6">Your Orders</h1>
+        <div className="space-y-6">
+          {orders.map((order) => (
+            <Card key={order.id}>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Order #{order.id}</CardTitle>
+                <div className="flex items-center gap-2">
+                  <Badge
+                    className={
+                      order.status === 'delivered' ? 'bg-green-500' :
+                      order.status === 'processing' ? 'bg-blue-500' :
+                      order.status === 'cancelled' ? 'bg-red-500' :
+                      'bg-yellow-500'
+                    }
+                  >
+                    {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                  </Badge>
+                  <span className="text-sm text-muted-foreground">
+                    {new Date(order.createdAt).toLocaleDateString()}
+                  </span>
                 </div>
-              </div>
-              <div className="mt-4">
-                <Link
-                  to={`/orders/${order.id}`}
-                  className="text-primary hover:underline"
-                >
-                  View Order Details
-                </Link>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {order.products.map((item) => (
+                    <div key={item.productId} className="flex justify-between">
+                      <span>Product #{item.productId} x {item.quantity}</span>
+                      <span>${(item.price * item.quantity).toFixed(2)}</span>
+                    </div>
+                  ))}
+                  <div className="border-t pt-2 mt-2 flex justify-between font-bold">
+                    <span>Total</span>
+                    <span>${order.total.toFixed(2)}</span>
+                  </div>
+                </div>
+                <div className="mt-4">
+                  <Link
+                    to={`/orders/${order.id}`}
+                    className="text-primary hover:underline"
+                  >
+                    View Order Details
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       </div>
-    </div>
+    </ProtectedRoute>
   );
 }
 
