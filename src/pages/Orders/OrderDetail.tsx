@@ -4,7 +4,6 @@ import { useAuth } from '@/context/AuthContext';
 import { mockApi, Order, Product } from '@/lib/mock';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
-import { Button } from '@/components/ui/Button';
 
 function OrderDetail() {
   const { orderId } = useParams();
