@@ -35,7 +35,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-// import { mockApi, User } from '@/lib/mock';
 import { get, post, put, ApiError } from "@/lib/api";
 import { User } from "@/lib/types";
 import {

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Product } from '@/lib/mock';
+import { useState } from 'react';
+import { Product } from '@/lib/types';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Link } from 'react-router-dom';
@@ -22,8 +22,8 @@ export function ProductEntry({ product }: ProductEntryProps) {
             </div>
           ) : (
             <img
-              src={product.image}
-              alt={product.title}
+              src={product.imageURL}
+              alt={product.name}
               className="object-cover w-full h-full rounded-lg"
               onError={() => setImageError(true)}
             />
@@ -38,7 +38,7 @@ export function ProductEntry({ product }: ProductEntryProps) {
               >
                 {product.stock > 0 ? "In Stock" : "Out of Stock"}
               </Badge>
-              <h3 className="text-base font-semibold truncate">{product.title}</h3>
+              <h3 className="text-base font-semibold truncate">{product.name}</h3>
             </div>
             <p className="text-sm text-muted-foreground line-clamp-1 mt-0.5">{product.description}</p>
             <div className="text-base font-bold mt-1">

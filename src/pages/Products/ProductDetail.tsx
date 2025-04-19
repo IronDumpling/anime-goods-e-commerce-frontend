@@ -1,23 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { get } from "@/lib/api"; 
+import { Product } from '@/lib/types'
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { ImageOff, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
-
-interface Product {
-  id: number;
-  name: string;
-  brand: string;
-  description: string;
-  price: number;
-  stock: number;
-  status: 'ACTIVE' | 'INACTIVE' | 'DISCONTINUED';
-  imageURL: string,
-  category: string,
-  createdAt: string;
-}
 
 function ProductDetail() {
   const { productId } = useParams();

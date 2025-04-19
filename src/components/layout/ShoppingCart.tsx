@@ -1,7 +1,7 @@
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Trash } from "lucide-react";
-import { Product } from "@/lib/mock";
+import { Product } from "@/lib/types";
 
 interface CartItem extends Product {
   quantity: number;
@@ -16,9 +16,9 @@ export function ShoppingCart({ items, onRemove }: { items: CartItem[], onRemove:
       ) : (
         items.map((item) => (
           <div key={item.id} className="flex items-center py-4 border-b last:border-none">
-            <img src={item.image} className="w-20 h-20 object-cover" />
+            <img src={item.imageURL} className="w-20 h-20 object-cover" />
             <div className="ml-4 flex-1">
-              <h3 className="font-semibold">{item.title}</h3>
+              <h3 className="font-semibold">{item.name}</h3>
               <p className="text-primary font-semibold">${item.price}</p>
               <p className="text-sm text-muted-foreground">Qty: {item.quantity}</p>
             </div>

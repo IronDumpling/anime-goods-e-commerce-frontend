@@ -61,8 +61,8 @@ interface CartPreviewItemProps {
   item: {
     product: {
       id: number;
-      title: string;
-      image: string;
+      name: string;
+      imageURL: string;
       price: number;
     };
     quantity: number;
@@ -81,15 +81,15 @@ function CartPreviewItem({ item }: CartPreviewItemProps) {
           </div>
         ) : (
           <img
-            src={item.product.image}
-            alt={item.product.title}
+            src={item.product.imageURL}
+            alt={item.product.name}
             className="w-full h-full object-cover rounded-md"
             onError={() => setImageError(true)}
           />
         )}
       </div>
       <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate">{item.product.title}</p>
+        <p className="text-sm font-medium truncate">{item.product.name}</p>
         <p className="text-xs text-muted-foreground">
           ${item.product.price.toFixed(2)} × {item.quantity}
         </p>

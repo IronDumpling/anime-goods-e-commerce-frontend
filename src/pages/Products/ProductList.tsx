@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { ProductCard } from '@/components/layout/ProductCard';
 import { ProductEntry } from '@/components/layout/ProductEntry';
 import { mockApi, ProductCategory } from '@/lib/mock';
+import { Product } from '@/lib/types'
 import { get } from "@/lib/api"; 
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -20,19 +21,6 @@ interface FilterState {
   inStock: boolean;
   sortBy: 'price-asc' | 'price-desc' | 'newest' | 'name-asc' | 'name-desc';
   viewMode: 'card' | 'list';
-}
-
-interface Product {
-  id: number;
-  name: string;
-  brand: string;
-  description: string;
-  price: number;
-  stock: number;
-  status: 'ACTIVE' | 'INACTIVE' | 'DISCONTINUED';
-  imageURL: string,
-  category: string,
-  createdAt: string;
 }
 
 function ProductList() {
