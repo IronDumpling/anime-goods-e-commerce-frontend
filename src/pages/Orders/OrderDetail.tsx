@@ -88,12 +88,7 @@ function OrderDetail() {
   return (
     <ProtectedRoute accessLevel="self-and-admin">
       <div className="container mx-auto px-4 py-10">
-        <div className="mb-6">
-          <Link to="/orders" className="text-primary hover:underline">
-            ← Back to Orders
-          </Link>
-        </div>
-
+        <BackButton to={`/orders`} label="Back to Orders" />
         <h1 className="text-2xl font-bold mb-6">Order #{order.id}</h1>
 
         <div className="grid gap-6">

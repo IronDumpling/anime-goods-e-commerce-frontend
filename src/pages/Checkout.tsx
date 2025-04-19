@@ -1,43 +1,45 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import BackButton from '@/components/layout/BackButton';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import ProtectedRoute from '@/components/layout/ProtectedRoute';
-
-interface CartItem {
-  id: number;
-  name: string;
-  price: number;
-  quantity: number;
-  estimatedDelivery: string;
-}
+import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext';
+import { post } from "@/lib/api"; 
+import { useNavigate } from 'react-router-dom';
 
 const Checkout: React.FC = () => {
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const { items: cartItems, clearCart } = useCart();
   const [paymentMethod, setPaymentMethod] = useState<string>('credit_card');
 
-  useEffect(() => {
-    // Fetch from context or placeholder
-    setCartItems([
-      {
-        id: 1,
-        name: 'Anime Figure - Naruto',
-        price: 45.99,
-        quantity: 2,
-        estimatedDelivery: 'Apr 25 - Apr 28',
-      },
-      {
-        id: 2,
-        name: 'One Piece Poster',
-        price: 12.5,
-        quantity: 1,
-        estimatedDelivery: 'Apr 24 - Apr 27',
-      },
-    ]);
-  }, []);
+  const selectedItems = cartItems.filter((item) => item.selected);
+  const itemsToCheckout = selectedItems.length > 0 ? selectedItems : cartItems;
+  const total = itemsToCheckout.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
 
-  const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const handlePlaceOrder = async () => {
+    if (!user || itemsToCheckout.length === 0) return;
+
+    const payload = {
+      userId: user.id,
+      status: 'PENDING',
+      items: itemsToCheckout.map((item) => ({
+        productId: item.product.id,
+        quantity: item.quantity,
+      })),
+    };
+
+    try {
+      const response = await post('/api/order', payload);
+      console.log('Order created:', response.data);
+      clearCart();
+      navigate(`/user/${user.id}/orders`);
+    } catch (error) {
+      console.error('Failed to place order:', error);
+    }
+  };
 
   return (
     <ProtectedRoute accessLevel="user">
@@ -47,16 +49,16 @@ const Checkout: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div className="space-y-4">
-            {cartItems.map((item) => (
-              <Card key={item.id} className="p-4">
+            {itemsToCheckout.map((item) => (
+              <Card key={item.product.id} className="p-4">
                 <div className="flex justify-between">
                   <div>
-                    <h2 className="font-semibold text-lg text-left">{item.name}</h2>
+                    <h2 className="font-semibold text-lg text-left">{item.product.name}</h2>
                     <p className="text-sm text-muted-foreground text-left">
-                      Qty: {item.quantity} | Estimated: {item.estimatedDelivery}
+                      Qty: {item.quantity} | Estimated: 3-5 business days
                     </p>
                   </div>
-                  <div className="text-right font-medium">${(item.price * item.quantity).toFixed(2)}</div>
+                  <div className="text-right font-medium">${(item.product.price * item.quantity).toFixed(2)}</div>
                 </div>
               </Card>
             ))}
@@ -94,7 +96,7 @@ const Checkout: React.FC = () => {
                 <span>Total</span>
                 <span>${total.toFixed(2)}</span>
               </div>
-              <Button className="mt-4 w-full">Place Order</Button>
+              <Button className="mt-4 w-full" onClick={handlePlaceOrder}>Place Order</Button>
             </Card>
           </div>
         </div>

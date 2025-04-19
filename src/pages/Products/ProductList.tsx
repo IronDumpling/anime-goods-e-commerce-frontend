@@ -29,10 +29,11 @@ function ProductList() {
   const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const maxPrice = 500
   const [filters, setFilters] = useState<FilterState>({
     search: searchParams.get('search') || '',
     minPrice: Number(searchParams.get('minPrice')) || 0,
-    maxPrice: Number(searchParams.get('maxPrice')) || 1000,
+    maxPrice: Number(searchParams.get('maxPrice')) || maxPrice,
     categories: searchParams.get('categories')?.split(',') || [],
     inStock: searchParams.get('inStock') === 'true',
     sortBy: (searchParams.get('sortBy') as FilterState['sortBy']) || 'newest',
@@ -66,7 +67,7 @@ function ProductList() {
       ...prev,
       search: searchParams.get('search') || '',
       minPrice: Number(searchParams.get('minPrice')) || 0,
-      maxPrice: Number(searchParams.get('maxPrice')) || 1000,
+      maxPrice: Number(searchParams.get('maxPrice')) || maxPrice,
       categories: searchParams.get('categories')?.split(',') || [],
       inStock: searchParams.get('inStock') === 'true',
       sortBy: (searchParams.get('sortBy') as FilterState['sortBy']) || 'newest',
@@ -86,7 +87,7 @@ function ProductList() {
     }
 
     // Handle maxPrice
-    if (filters.maxPrice < 1000) {
+    if (filters.maxPrice < maxPrice) {
       params.set('maxPrice', filters.maxPrice.toString());
     } else {
       params.delete('maxPrice');
@@ -195,7 +196,7 @@ function ProductList() {
               <label className="text-sm font-medium">Price Range</label>
               <Slider
                 min={0}
-                max={1000}
+                max={maxPrice}
                 step={10}
                 value={[filters.minPrice, filters.maxPrice]}
                 onValueChange={([min, max]) => setFilters(prev => ({ ...prev, minPrice: min, maxPrice: max }))}
@@ -204,7 +205,7 @@ function ProductList() {
                 <Input
                   type="number"
                   min={0}
-                  max={1000}
+                  max={maxPrice}
                   value={filters.minPrice}
                   onChange={(e) => {
                     const value = Math.min(Math.max(0, Number(e.target.value)), filters.maxPrice);
@@ -216,10 +217,10 @@ function ProductList() {
                 <Input
                   type="number"
                   min={filters.minPrice}
-                  max={1000}
+                  max={maxPrice}
                   value={filters.maxPrice}
                   onChange={(e) => {
-                    const value = Math.min(Math.max(filters.minPrice, Number(e.target.value)), 1000);
+                    const value = Math.min(Math.max(filters.minPrice, Number(e.target.value)), maxPrice);
                     setFilters(prev => ({ ...prev, maxPrice: value }));
                   }}
                   className="w-24"
@@ -278,7 +279,7 @@ function ProductList() {
                 setFilters({
                   search: '',
                   minPrice: 0,
-                  maxPrice: 1000,
+                  maxPrice: maxPrice,
                   categories: [],
                   inStock: false,
                   sortBy: 'newest',
@@ -369,7 +370,7 @@ function ProductList() {
                   setFilters({
                     search: '',
                     minPrice: 0,
-                    maxPrice: 1000,
+                    maxPrice: maxPrice,
                     categories: [],
                     inStock: false,
                     sortBy: 'newest',
