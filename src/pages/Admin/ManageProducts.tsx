@@ -43,21 +43,10 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { post, put, get } from "@/lib/api"; 
-
-
-interface Product {
-  id: number;
-  name: string;
-  brand: string;
-  description: string;
-  price: number;
-  stock: number;
-  status: 'ACTIVE' | 'INACTIVE' | 'DISCONTINUED';
-  imageURL: string,
-  category: string,
-  createdAt: string;
-}
+import { post, put, get, ApiError } from "@/lib/api";
+import { Product } from '@/lib/types';
+import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const ManageProducts: React.FC = () => {
   const navigate = useNavigate();
@@ -73,8 +62,12 @@ const ManageProducts: React.FC = () => {
   const [currentProduct, setCurrentProduct] = useState<Partial<Product>>({});
   const [dialogOpen, setDialogOpen] = useState(false);
 
+  const [error, setError] = useState<string | null>(null);
+  
+
   const handleSubmit = async () => {
     try {
+      // Handle Invalid Product Alert
       const payload = {
         name: currentProduct.name || "",
         brand: currentProduct.brand || "",
@@ -87,18 +80,35 @@ const ManageProducts: React.FC = () => {
       };
 
       if (formMode === "create") {
-        await post("/api/product", payload);
+        const response = await post("/api/product", payload);
+        if (response.error || !response.data) {
+          throw response.error || { error: "Failed to create user" };
+        }
+        toast.success("User created successfully");
       } else if (formMode === "update" && currentProduct.id) {
-        await put(`/api/product/${currentProduct.id}`, payload);
+        const response = await put(`/api/product/${currentProduct.id}`, payload);
+        if (response.error || !response.data) {
+          throw response.error || { error: "Failed to update user" };
+        }
+        toast.success("User updated successfully");
       }
 
       setDialogOpen(false);
       setIsLoading(true);
-      const refreshed = await get<{ products: Product[] }>("/api/product?take=100");
-      if (!refreshed.data) throw new Error("Missing response data");
+      const refreshed = await get<{ products: Product[] }>("/api/product");
+      if (refreshed.error || !refreshed.data) {
+        throw refreshed.error || { error: "Failed to refresh user data" };
+      }
       setProducts(refreshed.data?.products || []);
-    } catch (e) {
-      console.error("Failed to submit product:", e);
+    } catch (error) {
+      console.error("Failed to submit product:", error);
+      const apiError = error as ApiError;
+      const errorMessage = apiError.details && apiError.details.length > 0
+        ? `${apiError.error}: ${apiError.details.join(', ')}`
+        : apiError.error || "An error occurred while processing your request";
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -199,7 +209,7 @@ const ManageProducts: React.FC = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await get<{ products: Product[] }>("/api/product?take=100");
+        const response = await get<{ products: Product[] }>("/api/product");
         if (response.error || !response.data) {
           throw response.error || { error: "Unknown Error Fetching Products" };
         }
@@ -340,6 +350,11 @@ const ManageProducts: React.FC = () => {
           <DialogHeader>
             <DialogTitle>{formMode === "create" ? "Add Product" : "Update Product"}</DialogTitle>
           </DialogHeader>
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
           <div className="space-y-4">
             <div>
               <Label>Name</Label>

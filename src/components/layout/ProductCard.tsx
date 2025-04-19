@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Product } from '@/lib/mock';
+import { useState } from 'react';
+import { Product } from '@/lib/types';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Link } from 'react-router-dom';
@@ -23,8 +23,8 @@ export function ProductCard({ product }: ProductCardProps) {
           </div>
         ) : (
           <img
-            src={product.image}
-            alt={product.title}
+            src={product.imageURL}
+            alt={product.name}
             className="object-cover w-full h-full"
             onError={() => setImageError(true)}
           />
@@ -37,7 +37,7 @@ export function ProductCard({ product }: ProductCardProps) {
         </Badge>
       </div>
       <div className="p-3 flex-grow">
-        <h3 className="text-lg font-semibold truncate">{product.title}</h3>
+        <h3 className="text-lg font-semibold truncate">{product.name}</h3>
         <p className="text-sm text-muted-foreground line-clamp-2">{product.description}</p>
         <div className="mt-1.5 font-bold">
           ${product.price.toFixed(2)}

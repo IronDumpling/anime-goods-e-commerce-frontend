@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { mockApi, Order, Product } from '@/lib/mock';
+import { mockApi, Order } from '@/lib/mock';
+import { get } from "@/lib/api"; 
+import { Product } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import ProtectedRoute from "@/components/layout/ProtectedRoute";
 import { Badge } from '@/components/ui/Badge';
@@ -37,7 +39,7 @@ function OrderDetail() {
 
         // Fetch product details for each item in the order
         const productPromises = orderData.products.map(item =>
-          mockApi.products.getById(item.productId)
+          get<Product>("/api/product/" + Number(item.productId))
         );
         const productResults = await Promise.all(productPromises);
 
@@ -129,14 +131,14 @@ function OrderDetail() {
                     <div key={item.productId} className="flex items-center gap-4">
                       {product && (
                         <img
-                          src={product.image}
-                          alt={product.title}
+                          src={product.imageURL}
+                          alt={product.name}
                           className="w-20 h-20 object-cover rounded"
                         />
                       )}
                       <div className="flex-1">
                         <h3 className="font-medium">
-                          {product ? product.title : `Product #${item.productId}`}
+                          {product ? product.name : `Product #${item.productId}`}
                         </h3>
                         <p className="text-sm text-muted-foreground">
                           Quantity: {item.quantity}

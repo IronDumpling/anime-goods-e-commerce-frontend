@@ -13,14 +13,16 @@
 //   password: string;
 // }
 
-export interface Product {
+interface Product {
   id: number;
-  title: string;
+  name: string;
+  brand: string;
   description: string;
   price: number;
-  image: string;
-  category: string;
   stock: number;
+  status: 'ACTIVE' | 'INACTIVE' | 'DISCONTINUED';
+  imageURL: string,
+  category: string,
   createdAt: string;
 }
 
@@ -89,158 +91,158 @@ export interface ProductCategory {
 //   return user;
 // };
 
-export const mockProducts: Product[] = [
-  {
-    id: 1,
-    title: "Naruto Uzumaki Figure",
-    description: "High-quality figure of Naruto Uzumaki in his signature pose",
-    price: 49.99,
-    image: "https://example.com/naruto-figure.jpg",
-    category: "Figures",
-    stock: 15,
-    createdAt: "2024-01-01",
-  },
-  {
-    id: 2,
-    title: "Attack on Titan Badge Set",
-    description: "Set of 5 badges featuring Attack on Titan characters",
-    price: 12.99,
-    image: "https://example.com/aot-badges.jpg",
-    category: "Accessories",
-    stock: 50,
-    createdAt: "2024-01-02",
-  },
-  {
-    id: 3,
-    title: "One Piece Volume 1",
-    description: "First volume of the One Piece manga series",
-    price: 9.99,
-    image: "https://example.com/one-piece-vol1.jpg",
-    category: "Media",
-    stock: 30,
-    createdAt: "2024-01-03",
-  },
-  {
-    id: 4,
-    title: "Demon Slayer Tanjiro Sword",
-    description: "Replica of Tanjiro's Nichirin Blade from Demon Slayer",
-    price: 89.99,
-    image: "https://example.com/tanjiro-sword.jpg",
-    category: "Cosplay",
-    stock: 5,
-    createdAt: "2024-01-04",
-  },
-  {
-    id: 5,
-    title: "My Hero Academia Hoodie",
-    description: "U.A. High School themed hoodie, available in multiple sizes",
-    price: 39.99,
-    image: "https://example.com/mha-hoodie.jpg",
-    category: "Clothing",
-    stock: 25,
-    createdAt: "2024-01-05",
-  },
-  {
-    id: 6,
-    title: "Ghibli Movies Collection",
-    description: "Complete collection of Studio Ghibli films on Blu-ray",
-    price: 199.99,
-    image: "https://example.com/ghibli-collection.jpg",
-    category: "Media",
-    stock: 10,
-    createdAt: "2024-01-06",
-  },
-  {
-    id: 7,
-    title: "Jujutsu Kaisen Phone Case",
-    description: "Protective phone case featuring Gojo Satoru design",
-    price: 19.99,
-    image: "https://example.com/jjk-case.jpg",
-    category: "Accessories",
-    stock: 40,
-    createdAt: "2024-01-07",
-  },
-  {
-    id: 8,
-    title: "Dragon Ball Z Action Figure Set",
-    description: "Set of 4 premium Dragon Ball Z character figures",
-    price: 129.99,
-    image: "https://example.com/dbz-figures.jpg",
-    category: "Figures",
-    stock: 8,
-    createdAt: "2024-01-08",
-  },
-  {
-    id: 9,
-    title: "Tokyo Ghoul Mask Replica",
-    description: "High-quality replica of Ken Kaneki's mask",
-    price: 34.99,
-    image: "https://example.com/kaneki-mask.jpg",
-    category: "Cosplay",
-    stock: 15,
-    createdAt: "2024-01-09",
-  },
-  {
-    id: 10,
-    title: "Death Note Notebook",
-    description: "Replica of the Death Note with faux leather cover",
-    price: 24.99,
-    image: "https://example.com/death-note.jpg",
-    category: "Accessories",
-    stock: 20,
-    createdAt: "2024-01-10",
-  },
-  {
-    id: 11,
-    title: "Sailor Moon Wand",
-    description: "Light-up replica of Sailor Moon's Cutie Moon Rod",
-    price: 44.99,
-    image: "https://example.com/sailor-moon-wand.jpg",
-    category: "Cosplay",
-    stock: 12,
-    createdAt: "2024-01-11",
-  },
-  {
-    id: 12,
-    title: "Evangelion Model Kit",
-    description: "1/144 scale EVA Unit-01 model kit with LED effects",
-    price: 79.99,
-    image: "https://example.com/eva-model.jpg",
-    category: "Figures",
-    stock: 7,
-    createdAt: "2024-01-12",
-  },
-  {
-    id: 13,
-    title: "Pokémon Trading Card Set",
-    description: "Limited edition set of 50 rare Pokémon cards",
-    price: 149.99,
-    image: "https://example.com/pokemon-cards.jpg",
-    category: "Media",
-    stock: 5,
-    createdAt: "2024-01-13",
-  },
-  {
-    id: 14,
-    title: "Hunter x Hunter T-Shirt",
-    description: "Cotton t-shirt featuring Hunter Association logo",
-    price: 29.99,
-    image: "https://example.com/hxh-shirt.jpg",
-    category: "Clothing",
-    stock: 18,
-    createdAt: "2024-01-14",
-  },
-  {
-    id: 15,
-    title: "Fullmetal Alchemist Pocket Watch",
-    description: "Detailed replica of State Alchemist pocket watch",
-    price: 59.99,
-    image: "https://example.com/fma-watch.jpg",
-    category: "Accessories",
-    stock: 0,
-    createdAt: "2024-01-15",
-  }
-];
+// export const mockProducts: Product[] = [
+//   {
+//     id: 1,
+//     title: "Naruto Uzumaki Figure",
+//     description: "High-quality figure of Naruto Uzumaki in his signature pose",
+//     price: 49.99,
+//     image: "https://example.com/naruto-figure.jpg",
+//     category: "Figures",
+//     stock: 15,
+//     createdAt: "2024-01-01",
+//   },
+//   {
+//     id: 2,
+//     title: "Attack on Titan Badge Set",
+//     description: "Set of 5 badges featuring Attack on Titan characters",
+//     price: 12.99,
+//     image: "https://example.com/aot-badges.jpg",
+//     category: "Accessories",
+//     stock: 50,
+//     createdAt: "2024-01-02",
+//   },
+//   {
+//     id: 3,
+//     title: "One Piece Volume 1",
+//     description: "First volume of the One Piece manga series",
+//     price: 9.99,
+//     image: "https://example.com/one-piece-vol1.jpg",
+//     category: "Media",
+//     stock: 30,
+//     createdAt: "2024-01-03",
+//   },
+//   {
+//     id: 4,
+//     title: "Demon Slayer Tanjiro Sword",
+//     description: "Replica of Tanjiro's Nichirin Blade from Demon Slayer",
+//     price: 89.99,
+//     image: "https://example.com/tanjiro-sword.jpg",
+//     category: "Cosplay",
+//     stock: 5,
+//     createdAt: "2024-01-04",
+//   },
+//   {
+//     id: 5,
+//     title: "My Hero Academia Hoodie",
+//     description: "U.A. High School themed hoodie, available in multiple sizes",
+//     price: 39.99,
+//     image: "https://example.com/mha-hoodie.jpg",
+//     category: "Clothing",
+//     stock: 25,
+//     createdAt: "2024-01-05",
+//   },
+//   {
+//     id: 6,
+//     title: "Ghibli Movies Collection",
+//     description: "Complete collection of Studio Ghibli films on Blu-ray",
+//     price: 199.99,
+//     image: "https://example.com/ghibli-collection.jpg",
+//     category: "Media",
+//     stock: 10,
+//     createdAt: "2024-01-06",
+//   },
+//   {
+//     id: 7,
+//     title: "Jujutsu Kaisen Phone Case",
+//     description: "Protective phone case featuring Gojo Satoru design",
+//     price: 19.99,
+//     image: "https://example.com/jjk-case.jpg",
+//     category: "Accessories",
+//     stock: 40,
+//     createdAt: "2024-01-07",
+//   },
+//   {
+//     id: 8,
+//     title: "Dragon Ball Z Action Figure Set",
+//     description: "Set of 4 premium Dragon Ball Z character figures",
+//     price: 129.99,
+//     image: "https://example.com/dbz-figures.jpg",
+//     category: "Figures",
+//     stock: 8,
+//     createdAt: "2024-01-08",
+//   },
+//   {
+//     id: 9,
+//     title: "Tokyo Ghoul Mask Replica",
+//     description: "High-quality replica of Ken Kaneki's mask",
+//     price: 34.99,
+//     image: "https://example.com/kaneki-mask.jpg",
+//     category: "Cosplay",
+//     stock: 15,
+//     createdAt: "2024-01-09",
+//   },
+//   {
+//     id: 10,
+//     title: "Death Note Notebook",
+//     description: "Replica of the Death Note with faux leather cover",
+//     price: 24.99,
+//     image: "https://example.com/death-note.jpg",
+//     category: "Accessories",
+//     stock: 20,
+//     createdAt: "2024-01-10",
+//   },
+//   {
+//     id: 11,
+//     title: "Sailor Moon Wand",
+//     description: "Light-up replica of Sailor Moon's Cutie Moon Rod",
+//     price: 44.99,
+//     image: "https://example.com/sailor-moon-wand.jpg",
+//     category: "Cosplay",
+//     stock: 12,
+//     createdAt: "2024-01-11",
+//   },
+//   {
+//     id: 12,
+//     title: "Evangelion Model Kit",
+//     description: "1/144 scale EVA Unit-01 model kit with LED effects",
+//     price: 79.99,
+//     image: "https://example.com/eva-model.jpg",
+//     category: "Figures",
+//     stock: 7,
+//     createdAt: "2024-01-12",
+//   },
+//   {
+//     id: 13,
+//     title: "Pokémon Trading Card Set",
+//     description: "Limited edition set of 50 rare Pokémon cards",
+//     price: 149.99,
+//     image: "https://example.com/pokemon-cards.jpg",
+//     category: "Media",
+//     stock: 5,
+//     createdAt: "2024-01-13",
+//   },
+//   {
+//     id: 14,
+//     title: "Hunter x Hunter T-Shirt",
+//     description: "Cotton t-shirt featuring Hunter Association logo",
+//     price: 29.99,
+//     image: "https://example.com/hxh-shirt.jpg",
+//     category: "Clothing",
+//     stock: 18,
+//     createdAt: "2024-01-14",
+//   },
+//   {
+//     id: 15,
+//     title: "Fullmetal Alchemist Pocket Watch",
+//     description: "Detailed replica of State Alchemist pocket watch",
+//     price: 59.99,
+//     image: "https://example.com/fma-watch.jpg",
+//     category: "Accessories",
+//     stock: 0,
+//     createdAt: "2024-01-15",
+//   }
+// ];
 
 export const mockOrders: Order[] = [
   {
@@ -379,56 +381,56 @@ export const mockApi = {
   // },
 
   // Product API
-  products: {
-    getAll: async (): Promise<Product[]> => {
-      return new Promise((resolve) => {
-        setTimeout(() => resolve(mockProducts), 500);
-      });
-    },
-    getById: async (id: number): Promise<Product | undefined> => {
-      return new Promise((resolve) => {
-        setTimeout(() => resolve(mockProducts.find(product => product.id === id)), 500);
-      });
-    },
-    getByCategory: async (category: string): Promise<Product[]> => {
-      return new Promise((resolve) => {
-        setTimeout(() => resolve(mockProducts.filter(product => product.category === category)), 500);
-      });
-    },
-    create: async (product: Omit<Product, 'id' | 'createdAt'>): Promise<Product> => {
-      return new Promise((resolve) => {
-        const newProduct: Product = {
-          ...product,
-          id: mockProducts.length + 1,
-          createdAt: new Date().toISOString().split('T')[0],
-        };
-        mockProducts.push(newProduct);
-        setTimeout(() => resolve(newProduct), 500);
-      });
-    },
-    update: async (id: number, productData: Partial<Product>): Promise<Product | undefined> => {
-      return new Promise((resolve) => {
-        const index = mockProducts.findIndex(product => product.id === id);
-        if (index !== -1) {
-          mockProducts[index] = { ...mockProducts[index], ...productData };
-          setTimeout(() => resolve(mockProducts[index]), 500);
-        } else {
-          setTimeout(() => resolve(undefined), 500);
-        }
-      });
-    },
-    delete: async (id: number): Promise<boolean> => {
-      return new Promise((resolve) => {
-        const index = mockProducts.findIndex(product => product.id === id);
-        if (index !== -1) {
-          mockProducts.splice(index, 1);
-          setTimeout(() => resolve(true), 500);
-        } else {
-          setTimeout(() => resolve(false), 500);
-        }
-      });
-    },
-  },
+  // products: {
+  //   getAll: async (): Promise<Product[]> => {
+  //     return new Promise((resolve) => {
+  //       setTimeout(() => resolve(mockProducts), 500);
+  //     });
+  //   },
+  //   getById: async (id: number): Promise<Product | undefined> => {
+  //     return new Promise((resolve) => {
+  //       setTimeout(() => resolve(mockProducts.find(product => product.id === id)), 500);
+  //     });
+  //   },
+  //   getByCategory: async (category: string): Promise<Product[]> => {
+  //     return new Promise((resolve) => {
+  //       setTimeout(() => resolve(mockProducts.filter(product => product.category === category)), 500);
+  //     });
+  //   },
+  //   create: async (product: Omit<Product, 'id' | 'createdAt'>): Promise<Product> => {
+  //     return new Promise((resolve) => {
+  //       const newProduct: Product = {
+  //         ...product,
+  //         id: mockProducts.length + 1,
+  //         createdAt: new Date().toISOString().split('T')[0],
+  //       };
+  //       mockProducts.push(newProduct);
+  //       setTimeout(() => resolve(newProduct), 500);
+  //     });
+  //   },
+  //   update: async (id: number, productData: Partial<Product>): Promise<Product | undefined> => {
+  //     return new Promise((resolve) => {
+  //       const index = mockProducts.findIndex(product => product.id === id);
+  //       if (index !== -1) {
+  //         mockProducts[index] = { ...mockProducts[index], ...productData };
+  //         setTimeout(() => resolve(mockProducts[index]), 500);
+  //       } else {
+  //         setTimeout(() => resolve(undefined), 500);
+  //       }
+  //     });
+  //   },
+  //   delete: async (id: number): Promise<boolean> => {
+  //     return new Promise((resolve) => {
+  //       const index = mockProducts.findIndex(product => product.id === id);
+  //       if (index !== -1) {
+  //         mockProducts.splice(index, 1);
+  //         setTimeout(() => resolve(true), 500);
+  //       } else {
+  //         setTimeout(() => resolve(false), 500);
+  //       }
+  //     });
+  //   },
+  // },
 
   // Order API
   orders: {

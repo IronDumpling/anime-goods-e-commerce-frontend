@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ProductCard } from '@/components/layout/ProductCard';
 import { ProductEntry } from '@/components/layout/ProductEntry';
-import { mockApi, Product, ProductCategory } from '@/lib/mock';
+import { mockApi, ProductCategory } from '@/lib/mock';
+import { Product } from '@/lib/types'
+import { get } from "@/lib/api"; 
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -42,11 +43,11 @@ function ProductList() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [productsData, categoriesData] = await Promise.all([
-          mockApi.products.getAll(),
+        const [productsRes, categoriesData] = await Promise.all([
+          get<{ products: Product[] }>("/api/product"),
           mockApi.categories.getAll(),
         ]);
-        setProducts(productsData);
+        setProducts(productsRes.data?.products || []);
         setCategories(categoriesData);
       } catch (err) {
         setError('Failed to load products');
@@ -134,7 +135,7 @@ function ProductList() {
   // Filter and sort products
   const filteredProducts = products
     .filter(product => {
-      const matchesSearch = product.title.toLowerCase().includes(filters.search.toLowerCase()) ||
+      const matchesSearch = product.name.toLowerCase().includes(filters.search.toLowerCase()) ||
                           product.description.toLowerCase().includes(filters.search.toLowerCase());
       const matchesPrice = product.price >= filters.minPrice && product.price <= filters.maxPrice;
       const matchesCategory = filters.categories.length === 0 || filters.categories.includes(product.category);
@@ -148,9 +149,9 @@ function ProductList() {
         case 'price-desc':
           return b.price - a.price;
         case 'name-asc':
-          return a.title.localeCompare(b.title);
+          return a.name.localeCompare(b.name);
         case 'name-desc':
-          return b.title.localeCompare(a.title);
+          return b.name.localeCompare(a.name);
         case 'newest':
         default:
           return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
