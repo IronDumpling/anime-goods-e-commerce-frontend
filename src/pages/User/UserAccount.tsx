@@ -48,11 +48,7 @@ function UserAccount() {
         <Card className="w-full max-w-md p-6">
           <h3 className="text-lg font-medium mb-4">Edit Address</h3>
           <div className="grid gap-3">
-            <Input placeholder="Street Address" defaultValue={user?.address} />
-            <Input placeholder="Unit (optional)" defaultValue={user?.address} />
-            <Input placeholder="City" defaultValue={user?.address} />
-            <Input placeholder="Province" defaultValue={user?.address} />
-            <Input placeholder="Postal code" defaultValue={user?.address} />
+            <Input placeholder="Address" defaultValue={user?.address} />
           </div>
           <div className="flex justify-end gap-2 mt-4">
             <Button variant="outline" onClick={closeEdit}>Cancel</Button>
@@ -64,11 +60,11 @@ function UserAccount() {
 
     const fieldLabel =
       visibleField === "firstName"
-      ? "Name"
+      ? "Edit First Name"
       : visibleField === "lastName"
-      ? "Name"
+      ? "Edit Last Name"
       : visibleField === "email"
-      ? "Email"
+      ? "Edit Email"
       : "Change Password";
 
     return (
@@ -162,8 +158,7 @@ function UserAccount() {
                 <div>
                   <h4 className="font-medium text-sm text-left">Address</h4>
                   <p className="text-muted-foreground text-sm text-left">
-                    {user?.address}{user?.address ? ", " + user?.address : ""}<br />
-                    {user?.address}, {user?.address} {user?.address}
+                    {user?.address}
                   </p>
                 </div>
                 <Button variant="outline" onClick={() => setEditField("address")}>Edit</Button>
