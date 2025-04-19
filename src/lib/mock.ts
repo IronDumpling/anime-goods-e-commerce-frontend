@@ -281,27 +281,27 @@ export const mockOrders: Order[] = [
 export const mockProductCategories: ProductCategory[] = [
   {
     title: "Figures",
-    href: "/products?category=figures",
+    href: "/products?categories=Figures",
     desc: "Action figures and collectible statues"
   },
   {
     title: "Accessories",
-    href: "/products?category=accessories",
+    href: "/products?categories=Accessories",
     desc: "Phone cases, watches, and other accessories"
   },
   {
     title: "Clothing",
-    href: "/products?category=clothing",
+    href: "/products?categories=Clothing",
     desc: "T-shirts, hoodies, and apparel"
   },
   {
     title: "Media",
-    href: "/products?category=media",
+    href: "/products?categories=Media",
     desc: "Manga, movies, and trading cards"
   },
   {
     title: "Cosplay",
-    href: "/products?category=cosplay",
+    href: "/products?categories=Cosplay",
     desc: "Costumes, props, and replicas"
   }
 ];
