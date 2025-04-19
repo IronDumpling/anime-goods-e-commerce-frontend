@@ -52,7 +52,7 @@ function UserAccount() {
           </div>
           <div className="flex justify-end gap-2 mt-4">
             <Button variant="outline" onClick={closeEdit}>Cancel</Button>
-            <Button>Save</Button>
+            <Button onClick={handleSave}>Save</Button>
           </div>
         </Card>
       );
@@ -78,7 +78,7 @@ function UserAccount() {
             <Input type="password" placeholder="Reenter new password" className="mb-4 text-left" />
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={closeEdit}>Cancel</Button>
-              <Button>Save</Button>
+              <Button onClick={handleSave}>Save</Button>
             </div>
           </>
         ) : (
