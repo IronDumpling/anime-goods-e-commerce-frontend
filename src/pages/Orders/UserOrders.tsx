@@ -3,7 +3,8 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from "lucide-react";
 
 import { useAuth } from '@/context/AuthContext';
-import { mockApi, Order } from '@/lib/mock';
+import { Order } from '@/lib/mock';
+import { get } from "@/lib/api";
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import ProtectedRoute from "@/components/layout/ProtectedRoute";
@@ -22,7 +23,12 @@ function UserOrders() {
       if (!user) return;
 
       try {
-        const data = await mockApi.orders.getByUserId(user.id);
+        const response = await get<Array<Order>>("/api/order/user/" + userId);
+        let data: Array<Order>;
+        if (response.error || !response.data) {
+          throw response.error || { error: "Unknown Error UserOrders"};
+        }
+        data = response.data;
         setOrders(data);
       } catch (err) {
         setError('Failed to load orders');
@@ -56,6 +62,12 @@ function UserOrders() {
   if (orders.length === 0) {
     return (
       <div className="container mx-auto px-4 py-10">
+        <button
+          className="flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
+          onClick={() => navigate(`/user/${userId}`)}
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" /> Back to User Page
+        </button>
         <h1 className="text-2xl font-bold mb-6">Your Orders</h1>
         <div className="text-center">
           <p className="mb-4">You haven't placed any orders yet.</p>
