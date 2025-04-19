@@ -73,28 +73,30 @@ function CartPreviewItem({ item }: CartPreviewItemProps) {
   const [imageError, setImageError] = useState(false);
 
   return (
-    <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-accent">
-      <div className="w-12 h-12 relative bg-muted rounded-md flex-shrink-0">
-        {imageError ? (
-          <div className="w-full h-full flex items-center justify-center">
-            <ImageOff className="h-6 w-6 text-muted-foreground" />
-          </div>
-        ) : (
-          <img
-            src={item.product.imageURL}
-            alt={item.product.name}
-            className="w-full h-full object-cover rounded-md"
-            onError={() => setImageError(true)}
-          />
-        )}
+    <Link to={`/products/${item.product.id}`}>
+      <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-accent">
+        <div className="w-12 h-12 relative bg-muted rounded-md flex-shrink-0">
+          {imageError ? (
+            <div className="w-full h-full flex items-center justify-center">
+              <ImageOff className="h-6 w-6 text-muted-foreground" />
+            </div>
+          ) : (
+            <img
+              src={item.product.imageURL}
+              alt={item.product.name}
+              className="w-full h-full object-cover rounded-md"
+              onError={() => setImageError(true)}
+            />
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium truncate">{item.product.name}</p>
+          <p className="text-xs text-muted-foreground">
+            ${item.product.price.toFixed(2)} × {item.quantity}
+          </p>
+        </div>
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate">{item.product.name}</p>
-        <p className="text-xs text-muted-foreground">
-          ${item.product.price.toFixed(2)} × {item.quantity}
-        </p>
-      </div>
-    </div>
+    </Link>
   );
 }
 
