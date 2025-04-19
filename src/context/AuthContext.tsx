@@ -33,6 +33,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const setUserPersistent = (user: User | null) => {
+
+    if (user === null) {
+      setUser(null);
+      localStorage.removeItem('user');
+    } else {
+      setUser(user);
+      localStorage.setItem('user', JSON.stringify(user));
+    }
+
+  }
+
+  const setTokenPersistent = (token: string | null) => {
+    if (token === null) {
+      setToken(null);
+      localStorage.removeItem('token');
+    } else {
+      setToken(token);
+      localStorage.setItem('token', token);
+    }
+
+
+  }
+
   const login = async (email: string, password: string) => {
     try {
 
@@ -43,11 +67,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const user = response.data;
 
-      setUser(user);
+      setUserPersistent(user);
 
       // TODO: fetch and Store token and user data in localStorage
-      // localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
+      // setTokenPersistent(token);
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -78,10 +101,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
-    setToken(null);
-    setUser(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    setTokenPersistent(null);
+    setUserPersistent(null);
   };
 
   const updateUser = async (user: User) => {
@@ -96,7 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw response.error;
     }
     if (response.data) {
-      setUser(response.data);
+      setUserPersistent(response.data);
     }
   };
 
