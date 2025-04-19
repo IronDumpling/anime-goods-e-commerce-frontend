@@ -143,9 +143,11 @@ function CartPreview() {
 
 export default function Navbar() {
   const { toggleTheme } = useTheme();
-  const { isLoggedIn, username, isAdmin, logout } = useAuth();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const isLoggedIn = user !== null;
+  const isAdmin = user?.isAdmin;
   const userId = user?.id;
+  const firstName = user?.firstName;
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -198,14 +200,17 @@ export default function Navbar() {
   };
 
   const handleLogout = () => {
-    // Navigate to home page with a state indicating we're logging out
-    navigate('/', { state: { isLoggingOut: true } });
-    // Use setTimeout to ensure navigation completes before logout
-    setTimeout(() => {
+    // Only navigate if we're not already on the products page
+    if (location.pathname !== '/products') {
+      navigate('/products');
+      // Use setTimeout to ensure navigation completes before logout
+      setTimeout(() => {
+        logout();
+      }, 100);
+    } else {
+      // If already on products page, just logout directly
       logout();
-    }, 100);
-    // !(yushun): make sure the homepage displays exactly the same content
-    // no matter whether the user is logged in or not
+    }
   };
 
   const renderUserMenu = () => {
@@ -227,7 +232,7 @@ export default function Navbar() {
       return (
         <div className="w-[200px] p-4">
           <div className="mb-4">
-            <p className="text-sm font-medium">Welcome, Admin {username}!</p>
+            <p className="text-sm font-medium">Welcome, Admin {firstName}!</p>
           </div>
           <div className="grid gap-3">
             <Link
@@ -268,7 +273,7 @@ export default function Navbar() {
     return (
       <div className="w-[200px] p-4">
         <div className="mb-4">
-          <p className="text-sm font-medium">Welcome, {username}!</p>
+          <p className="text-sm font-medium">Welcome, {firstName}!</p>
         </div>
         <div className="grid gap-3">
           <Link
