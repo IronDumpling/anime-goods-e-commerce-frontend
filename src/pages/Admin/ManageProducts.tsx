@@ -40,7 +40,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -59,92 +58,6 @@ interface Product {
   category: string,
   createdAt: string;
 }
-
-const columns: ColumnDef<Product>[] = [
-  {
-    id: "select",
-    header: ({ table }) => (
-      <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
-        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-        aria-label="Select all"
-      />
-    ),
-    cell: ({ row }) => (
-      <Checkbox
-        checked={row.getIsSelected()}
-        onCheckedChange={(value) => row.toggleSelected(!!value)}
-        aria-label="Select row"
-      />
-    ),
-    enableSorting: false,
-    enableHiding: false,
-  },
-  {
-    accessorKey: "id",
-    header: ({ column }) => (
-      <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>ID<ArrowUpDown className="ml-2 h-4 w-4" /></Button>
-    ),
-    cell: ({ row }) => <div className="font-medium">{row.getValue("id")}</div>,
-  },
-  {
-    accessorKey: "name",
-    header: "Name",
-  },
-  {
-    accessorKey: "brand",
-    header: "Brand",
-  },
-  {
-    accessorKey: "price",
-    header: "Price",
-  },
-  {
-    accessorKey: "stock",
-    header: "Stock",
-  },
-  {
-    accessorKey: "category",
-    header: "Category",
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => <span className="capitalize">{row.getValue("status")}</span>,
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Created At",
-  },
-  {
-    id: "actions",
-    enableHiding: false,
-    header: "Actions",
-    cell: ({ row }) => {
-      const product = row.original;
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(product.id.toString())}>Copy Product ID</DropdownMenuItem>
-            <DropdownMenuItem>View</DropdownMenuItem>
-            <DropdownMenuItem>Update</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-red-600 focus:text-red-600">Delete</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
-    },
-  },
-];
 
 const ManageProducts: React.FC = () => {
   const navigate = useNavigate();
@@ -188,6 +101,100 @@ const ManageProducts: React.FC = () => {
       console.error("Failed to submit product:", e);
     }
   };
+
+  const columns: ColumnDef<Product>[] = [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getIsAllPageRowsSelected() ||
+            (table.getIsSomePageRowsSelected() && "indeterminate")
+          }
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      accessorKey: "id",
+      header: ({ column }) => (
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>ID<ArrowUpDown className="ml-2 h-4 w-4" /></Button>
+      ),
+      cell: ({ row }) => <div className="font-medium">{row.getValue("id")}</div>,
+    },
+    {
+      accessorKey: "name",
+      header: "Name",
+    },
+    {
+      accessorKey: "brand",
+      header: "Brand",
+    },
+    {
+      accessorKey: "price",
+      header: "Price",
+    },
+    {
+      accessorKey: "stock",
+      header: "Stock",
+    },
+    {
+      accessorKey: "category",
+      header: "Category",
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => <span className="capitalize">{row.getValue("status")}</span>,
+    },
+    {
+      accessorKey: "createdAt",
+      header: "Created At",
+    },
+    {
+      id: "actions",
+      enableHiding: false,
+      header: "Actions",
+      cell: ({ row }) => {
+        const product = row.original;
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => navigator.clipboard.writeText(product.id.toString())}>Copy Product ID</DropdownMenuItem>
+              <DropdownMenuItem>View</DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  setFormMode("update");
+                  setCurrentProduct(product);
+                  setDialogOpen(true);
+                }}
+              >
+                Update
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-red-600 focus:text-red-600">Delete</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
+    },
+  ];
 
   useEffect(() => {
     const fetchProducts = async () => {
