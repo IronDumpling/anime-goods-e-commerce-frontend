@@ -99,6 +99,8 @@ const ManageProducts: React.FC = () => {
       setProducts(refreshed.data?.products || []);
     } catch (e) {
       console.error("Failed to submit product:", e);
+    } finally {
+      setIsLoading(false);
     }
   };
 
