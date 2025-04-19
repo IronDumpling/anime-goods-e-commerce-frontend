@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
-import { mockApi, Order } from '@/lib/mock';
 import { get } from "@/lib/api"; 
-import { Product } from '@/lib/types';
+import { Product, Order } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import ProtectedRoute from "@/components/layout/ProtectedRoute";
 import BackButton from '@/components/layout/BackButton';
@@ -11,7 +10,6 @@ import { Badge } from '@/components/ui/Badge';
 
 function OrderDetail() {
   const { orderId } = useParams();
-  // TODO: get userId from orderId
   const { user } = useAuth();
   const [order, setOrder] = useState<Order | null>(null);
   const [products, setProducts] = useState<Record<number, Product>>({});
@@ -23,14 +21,13 @@ function OrderDetail() {
       if (!orderId || !user) return;
 
       try {
-        const orderData = await mockApi.orders.getById(parseInt(orderId));
-
-        if (!orderData) {
-          setError('Order not found');
-          return;
+        const response = await get<Order>("/api/order/" + parseInt(orderId));
+        if (response.error || !response.data) {
+          throw response.error || { error: "Unknown Error Order Detail"};
         }
 
         // Verify that the order belongs to the current user
+        const orderData = response.data;
         if (orderData.userId !== user.id) {
           setError('You do not have permission to view this order');
           return;
@@ -39,7 +36,7 @@ function OrderDetail() {
         setOrder(orderData);
 
         // Fetch product details for each item in the order
-        const productPromises = orderData.products.map(item =>
+        const productPromises = orderData.orderItems.map(item =>
           get<Product>("/api/product/" + Number(item.productId))
         );
         const productResults = await Promise.all(productPromises);
@@ -121,7 +118,7 @@ function OrderDetail() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {order.products.map((item) => {
+                {order.orderItems.map((item) => {
                   const product = products[item.productId];
                   return (
                     <div key={item.productId} className="flex items-center gap-4">
@@ -140,12 +137,12 @@ function OrderDetail() {
                           Quantity: {item.quantity}
                         </p>
                         <p className="text-sm">
-                          Price: ${item.price.toFixed(2)} each
+                          Price: ${item.unitPrice.toFixed(2)} each
                         </p>
                       </div>
                       <div className="text-right">
                         <p className="font-medium">
-                          ${(item.price * item.quantity).toFixed(2)}
+                          ${(item.unitPrice * item.quantity).toFixed(2)}
                         </p>
                       </div>
                     </div>
@@ -163,7 +160,7 @@ function OrderDetail() {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span>${order.total.toFixed(2)}</span>
+                  <span>${order.total?.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Shipping</span>
@@ -171,7 +168,7 @@ function OrderDetail() {
                 </div>
                 <div className="border-t pt-2 mt-2 flex justify-between font-bold">
                   <span>Total</span>
-                  <span>${order.total.toFixed(2)}</span>
+                  <span>${order.total?.toFixed(2)}</span>
                 </div>
               </div>
             </CardContent>

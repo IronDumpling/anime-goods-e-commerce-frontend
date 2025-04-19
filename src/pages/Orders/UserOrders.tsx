@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
 import { useAuth } from '@/context/AuthContext';
-import { Order } from '@/lib/mock';
+import { Order } from '@/lib/types';
 import { get } from "@/lib/api";
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -101,15 +101,15 @@ function UserOrders() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {order.products.map((item) => (
+                  {order.orderItems.map((item) => (
                     <div key={item.productId} className="flex justify-between">
                       <span>Product #{item.productId} x {item.quantity}</span>
-                      <span>${(item.price * item.quantity).toFixed(2)}</span>
+                      <span>${(item.unitPrice * item.quantity).toFixed(2)}</span>
                     </div>
                   ))}
                   <div className="border-t pt-2 mt-2 flex justify-between font-bold">
                     <span>Total</span>
-                    <span>${order.total.toFixed(2)}</span>
+                    <span>${order.total?.toFixed(2)}</span>
                   </div>
                 </div>
                 <div className="mt-4">
