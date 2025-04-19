@@ -24,15 +24,20 @@ function OrderDetail() {
       if (!orderId || !user) return;
 
       try {
+        console.log("User ID:", user.id, "Is Admin:", user.isAdmin);
         const response = await get<Order>("/api/order/" + parseInt(orderId));
+        console.log("Order API Response:", response);
+
         if (response.error || !response.data) {
           throw response.error || { error: "Unknown Error Order Detail"};
         }
 
         // Verify that the order belongs to the current user
         const orderData = response.data;
-        if (orderData.userId !== user.id) {
-          setError('You do not have permission to view this order');
+        console.log("Order User ID:", orderData.userId);
+
+        if (!user.isAdmin && orderData.userId !== user.id) {
+          setError("You do not have permission to view this order");
           return;
         }
 
