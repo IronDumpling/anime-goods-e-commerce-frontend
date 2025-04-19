@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ProductCard } from '@/components/layout/ProductCard';
 import { ProductEntry } from '@/components/layout/ProductEntry';
-import { mockApi, ProductCategory } from '@/lib/mock';
+import { typesApi, ProductCategory } from '@/lib/types';
 import { Product } from '@/lib/types'
 import { get } from "@/lib/api"; 
 import { Button } from '@/components/ui/Button';
@@ -46,7 +46,7 @@ function ProductList() {
       try {
         const [productsRes, categoriesData] = await Promise.all([
           get<{ products: Product[] }>("/api/product"),
-          mockApi.categories.getAll(),
+          typesApi.categories.getAll(),
         ]);
         setProducts(productsRes.data?.products || []);
         setCategories(categoriesData);
