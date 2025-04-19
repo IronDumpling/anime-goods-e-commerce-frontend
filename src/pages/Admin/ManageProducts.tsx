@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft, ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -15,6 +15,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
+import BackButton from "@/components/layout/BackButton";
 import ProtectedRoute from '@/components/layout/ProtectedRoute';
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -254,12 +255,7 @@ const ManageProducts: React.FC = () => {
   return (
     <ProtectedRoute accessLevel="admin">
       <div className="container mx-auto py-10">
-        <button
-          className="flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
-          onClick={() => navigate(`/admin`)}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" /> Back to Admin Page
-        </button>
+        <BackButton to={`/admin`} label="Back to Admin Page" />
         <h1 className="text-2xl font-bold mb-6">Manage Products</h1>
         <Button
           onClick={() => {

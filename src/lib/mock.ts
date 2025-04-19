@@ -13,18 +13,18 @@
 //   password: string;
 // }
 
-interface Product {
-  id: number;
-  name: string;
-  brand: string;
-  description: string;
-  price: number;
-  stock: number;
-  status: 'ACTIVE' | 'INACTIVE' | 'DISCONTINUED';
-  imageURL: string,
-  category: string,
-  createdAt: string;
-}
+// interface Product {
+//   id: number;
+//   name: string;
+//   brand: string;
+//   description: string;
+//   price: number;
+//   stock: number;
+//   status: 'ACTIVE' | 'INACTIVE' | 'DISCONTINUED';
+//   imageURL: string,
+//   category: string,
+//   createdAt: string;
+// }
 
 export interface Order {
   id: number;

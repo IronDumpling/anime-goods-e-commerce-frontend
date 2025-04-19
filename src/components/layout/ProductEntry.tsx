@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Product } from '@/lib/types';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
+import { useCart } from '@/context/CartContext';
 import { Link } from 'react-router-dom';
 import { ImageOff, ShoppingCart } from 'lucide-react';
 
@@ -11,6 +12,7 @@ interface ProductEntryProps {
 
 export function ProductEntry({ product }: ProductEntryProps) {
   const [imageError, setImageError] = useState(false);
+  const { addItem } = useCart();
 
   return (
     <div className="bg-card text-card-foreground rounded-xl border shadow-sm overflow-hidden hover:shadow-lg transition-shadow">
@@ -53,16 +55,10 @@ export function ProductEntry({ product }: ProductEntryProps) {
               size="sm"
               className="text-primary-foreground"
               disabled={product.stock <= 0}
+              onClick={() => addItem(product)}
             >
               <ShoppingCart className="mr-2 h-4 w-4" />
               Add to Cart
-            </Button>
-            <Button
-              size="sm"
-              className="text-primary-foreground"
-              disabled={product.stock <= 0}
-            >
-              Buy Now
             </Button>
           </div>
         </div>

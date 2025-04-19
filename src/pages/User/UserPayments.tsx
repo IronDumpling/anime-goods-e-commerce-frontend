@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft } from "lucide-react";
+import { useParams } from 'react-router-dom';
 
 import ProtectedRoute from '@/components/layout/ProtectedRoute';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import BackButton from '@/components/layout/BackButton';
 
 interface PaymentMethod {
   id: string;
@@ -18,7 +18,6 @@ interface PaymentMethod {
 
 const UserPayments: React.FC = () => {
   const { userId } = useParams();
-  const navigate = useNavigate();
 
   const [methods, setMethods] = useState<PaymentMethod[]>([
     { id: '1', type: 'credit_card', label: 'Visa', lastFour: '4242', isDefault: true },
@@ -38,12 +37,7 @@ const UserPayments: React.FC = () => {
   return (
     <ProtectedRoute accessLevel="self">
       <div className="container mx-auto px-4 py-10">
-        <button
-          className="flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
-          onClick={() => navigate(`/user/${userId}`)}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" /> Back to User Page
-        </button>
+        <BackButton to={`/user/${userId}`} label="Back to User Page" />
         <h1 className="text-3xl font-bold mb-6">Manage Payment Methods</h1>
 
         <RadioGroup value={selectedId} onValueChange={setSelectedId} className="space-y-4">
