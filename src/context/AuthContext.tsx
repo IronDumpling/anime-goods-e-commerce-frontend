@@ -1,15 +1,6 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { post, put } from '@/lib/api';
-
-export interface User {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  address: string;
-  isAdmin: boolean;
-}
-
+import { User } from "@/lib/types";
 interface AuthContextState {
   token: string | null;
   user: User | null;
@@ -59,18 +50,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-
-      const response = await post<User>('/api/user/login', { email, password });
+      const response = await post<{ user: User; token: string }>('/api/user/login', { email, password });
       if (response.error || !response.data) {
         throw response.error || { error: "Unknown Error AuthContext" };
       }
 
-      const user = response.data;
-
+      const { user, token } = response.data;
       setUserPersistent(user);
-
-      // TODO: fetch and Store token and user data in localStorage
-      // setTokenPersistent(token);
+      setTokenPersistent(token);
     } catch (error) {
       console.error('Login error:', error);
       throw error;
