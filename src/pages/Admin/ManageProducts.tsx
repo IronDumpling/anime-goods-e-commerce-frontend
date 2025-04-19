@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ArrowLeft, ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import ProtectedRoute from '@/components/layout/ProtectedRoute';
-import { get } from '@/lib/api';
+
 import {
   ColumnDef,
   ColumnFiltersState,
@@ -16,6 +15,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 
+import ProtectedRoute from '@/components/layout/ProtectedRoute';
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -35,6 +35,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { post, put, get } from "@/lib/api"; 
+
 
 interface Product {
   id: number;
@@ -44,10 +55,34 @@ interface Product {
   price: number;
   stock: number;
   status: 'ACTIVE' | 'INACTIVE' | 'DISCONTINUED';
+  imageURL: string,
+  category: string,
   createdAt: string;
 }
 
 const columns: ColumnDef<Product>[] = [
+  {
+    id: "select",
+    header: ({ table }) => (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() ||
+          (table.getIsSomePageRowsSelected() && "indeterminate")
+        }
+        onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+        aria-label="Select all"
+      />
+    ),
+    cell: ({ row }) => (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => row.toggleSelected(!!value)}
+        aria-label="Select row"
+      />
+    ),
+    enableSorting: false,
+    enableHiding: false,
+  },
   {
     accessorKey: "id",
     header: ({ column }) => (
@@ -70,6 +105,10 @@ const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "stock",
     header: "Stock",
+  },
+  {
+    accessorKey: "category",
+    header: "Category",
   },
   {
     accessorKey: "status",
@@ -116,6 +155,39 @@ const ManageProducts: React.FC = () => {
   const [globalFilter, setGlobalFilter] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  const [formMode, setFormMode] = useState<"create" | "update" | null>(null);
+  const [currentProduct, setCurrentProduct] = useState<Partial<Product>>({});
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const handleSubmit = async () => {
+    try {
+      const payload = {
+        name: currentProduct.name || "",
+        brand: currentProduct.brand || "",
+        description: currentProduct.description || "",
+        price: Number(currentProduct.price || 0),
+        imageURL: currentProduct.imageURL || "",
+        stock: Number(currentProduct.stock || 0),
+        status: currentProduct.status || "ACTIVE",
+        category: currentProduct.category || "Figures",
+      };
+
+      if (formMode === "create") {
+        await post("/api/product", payload);
+      } else if (formMode === "update" && currentProduct.id) {
+        await put(`/api/product/${currentProduct.id}`, payload);
+      }
+
+      setDialogOpen(false);
+      setIsLoading(true);
+      const refreshed = await get<{ products: Product[] }>("/api/product?take=100");
+      if (!refreshed.data) throw new Error("Missing response data");
+      setProducts(refreshed.data?.products || []);
+    } catch (e) {
+      console.error("Failed to submit product:", e);
+    }
+  };
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -172,6 +244,15 @@ const ManageProducts: React.FC = () => {
           <ArrowLeft className="h-4 w-4 mr-2" /> Back to Admin Page
         </button>
         <h1 className="text-2xl font-bold mb-6">Manage Products</h1>
+        <Button
+          onClick={() => {
+            setCurrentProduct({});
+            setFormMode("create");
+            setDialogOpen(true);
+          }}
+        >
+          + Add Product
+        </Button>
         <div className="w-full">
           <div className="flex items-center py-4">
             <Input
@@ -247,6 +328,63 @@ const ManageProducts: React.FC = () => {
           </div>
         </div>
       </div>
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{formMode === "create" ? "Add Product" : "Update Product"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Name</Label>
+              <Input value={currentProduct.name || ""} onChange={(e) => setCurrentProduct((p) => ({ ...p, name: e.target.value }))} />
+            </div>
+            <div>
+              <Label>Brand</Label>
+              <Input value={currentProduct.brand || ""} onChange={(e) => setCurrentProduct((p) => ({ ...p, brand: e.target.value }))} />
+            </div>
+            <div>
+              <Label>Category</Label>
+              <Input value={currentProduct.category || ""} onChange={(e) => setCurrentProduct((p) => ({ ...p, category: e.target.value }))} />
+            </div>
+            <div>
+              <Label>Description</Label>
+              <Input value={currentProduct.description || ""} onChange={(e) => setCurrentProduct((p) => ({ ...p, description: e.target.value }))} />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Price</Label>
+                <Input type="number" value={currentProduct.price || ""} onChange={(e) => setCurrentProduct((p) => ({ ...p, price: parseFloat(e.target.value) }))} />
+              </div>
+              <div>
+                <Label>Stock</Label>
+                <Input type="number" value={currentProduct.stock || ""} onChange={(e) => setCurrentProduct((p) => ({ ...p, stock: parseInt(e.target.value) }))} />
+              </div>
+            </div>
+            <div>
+              <Label>Status</Label>
+              <Select value={currentProduct.status || "ACTIVE"} onValueChange={(val) => setCurrentProduct((p) => ({ ...p, status: val as Product["status"] }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ACTIVE">ACTIVE</SelectItem>
+                  <SelectItem value="INACTIVE">INACTIVE</SelectItem>
+                  <SelectItem value="DISCONTINUED">DISCONTINUED</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Image URL</Label>
+              <Input value={currentProduct.imageURL || ""} onChange={(e) => setCurrentProduct((p) => ({ ...p, imageURL: e.target.value }))} />
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+              <Button onClick={handleSubmit}>{formMode === "create" ? "Create" : "Update"}</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
     </ProtectedRoute>
   );
 };
