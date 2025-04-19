@@ -36,8 +36,19 @@ import {
   TableRow,
 } from "@/components/ui/table";
 // import { mockApi, User } from '@/lib/mock';
-import { get } from "@/lib/api";
-import { User } from "@/context/AuthContext";
+import { get, post, put, ApiError } from "@/lib/api";
+import { User } from "@/lib/types";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { toast } from "sonner";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+
 
 const columns: ColumnDef<User>[] = [
   {
@@ -191,18 +202,28 @@ const ManageUsers: React.FC = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  // New states for user management
+  const [formMode, setFormMode] = useState<"create" | "update" | null>(null);
+  const [currentUser, setCurrentUser] = useState<Partial<User> & { password?: string }>({});
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
         const response = await get<Array<User>>("/api/user/allCustomers");
-        let data: Array<User>;
         if (response.error || !response.data) {
-          throw response.error || { error: "Unknown Error ManageUsers"};
+          throw response.error || { error: "Unknown Error ManageUsers" };
         }
-        data = response.data;
-        setUsers(data);
+        setUsers(response.data);
       } catch (error) {
-        // TODO(yushun): Maybe we want to use a toast to show error
+        // Using sonner toast for error notification
+        const apiError = error as ApiError;
+        const errorMessage = apiError.details && apiError.details.length > 0
+          ? `${apiError.error}: ${apiError.details.join(', ')}`
+          : apiError.error || "Error fetching users";
+        toast.error(errorMessage);
         console.error('Error fetching users:', error);
       } finally {
         setIsLoading(false);
@@ -242,6 +263,66 @@ const ManageUsers: React.FC = () => {
     },
   });
 
+  const handleSubmit = async () => {
+    try {
+      setIsSubmitting(true);
+      setError(null);
+
+      // Validate required fields
+      if (!currentUser.firstName || !currentUser.lastName || !currentUser.email) {
+        setError("First name, last name, and email are required fields.");
+        return;
+      }
+
+      // For new users, password is required
+      if (formMode === "create" && !currentUser.password) {
+        setError("Password is required for new users.");
+        return;
+      }
+
+      const payload = {
+        firstName: currentUser.firstName,
+        lastName: currentUser.lastName,
+        email: currentUser.email,
+        address: currentUser.address || "",
+        isAdmin: currentUser.isAdmin || false,
+        ...(currentUser.password && { password: currentUser.password }),
+      };
+
+      if (formMode === "create") {
+        const response = await post<User>("/api/user", payload);
+        if (response.error || !response.data) {
+          throw response.error || { error: "Failed to create user" };
+        }
+        toast.success("User created successfully");
+      } else if (formMode === "update" && currentUser.id) {
+        const response = await put<User>(`/api/user/${currentUser.id}`, payload);
+        if (response.error || !response.data) {
+          throw response.error || { error: "Failed to update user" };
+        }
+        toast.success("User updated successfully");
+      }
+
+      setDialogOpen(false);
+      setIsLoading(true);
+      const refreshed = await get<Array<User>>("/api/user/allCustomers");
+      if (refreshed.error || !refreshed.data) {
+        throw refreshed.error || { error: "Failed to refresh user data" };
+      }
+      setUsers(refreshed.data);
+    } catch (error) {
+      console.error("Failed to submit user:", error);
+      const apiError = error as ApiError;
+      const errorMessage = apiError.details && apiError.details.length > 0
+        ? `${apiError.error}: ${apiError.details.join(', ')}`
+        : apiError.error || "An error occurred while processing your request";
+      setError(errorMessage);
+    } finally {
+      setIsSubmitting(false);
+      setIsLoading(false);
+    }
+  };
+
   return (
     <ProtectedRoute accessLevel="admin">
       <div className="container mx-auto py-10">
@@ -252,6 +333,16 @@ const ManageUsers: React.FC = () => {
           <ArrowLeft className="h-4 w-4 mr-2" /> Back to Admin Page
         </button>
         <h1 className="text-2xl font-bold mb-6">Manage Accounts</h1>
+        <Button
+          onClick={() => {
+            setCurrentUser({});
+            setFormMode("create");
+            setDialogOpen(true);
+          }}
+          className="mb-4"
+        >
+          + Add Account
+        </Button>
         <div className="w-full">
           <div className="flex items-center py-4">
             <Input
@@ -268,13 +359,6 @@ const ManageUsers: React.FC = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem>
-                    Set Active
-                  </DropdownMenuItem>
-                  <DropdownMenuItem>
-                    Set Inactive
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
                   <DropdownMenuItem>
                     Export Selected
                   </DropdownMenuItem>
@@ -395,6 +479,80 @@ const ManageUsers: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{formMode === "create" ? "Add User" : "Update User"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            <div>
+              <Label>First Name</Label>
+              <Input
+                value={currentUser.firstName || ""}
+                onChange={(e) => setCurrentUser((u) => ({ ...u, firstName: e.target.value }))}
+                required
+              />
+            </div>
+            <div>
+              <Label>Last Name</Label>
+              <Input
+                value={currentUser.lastName || ""}
+                onChange={(e) => setCurrentUser((u) => ({ ...u, lastName: e.target.value }))}
+                required
+              />
+            </div>
+            <div>
+              <Label>Email</Label>
+              <Input
+                type="email"
+                value={currentUser.email || ""}
+                onChange={(e) => setCurrentUser((u) => ({ ...u, email: e.target.value }))}
+                required
+              />
+            </div>
+            <div>
+              <Label>Address</Label>
+              <Input
+                value={currentUser.address || ""}
+                onChange={(e) => setCurrentUser((u) => ({ ...u, address: e.target.value }))}
+              />
+            </div>
+            {formMode === "create" && (
+              <div>
+                <Label>Password</Label>
+                <Input
+                  type="password"
+                  value={currentUser.password || ""}
+                  onChange={(e) => setCurrentUser((u) => ({ ...u, password: e.target.value }))}
+                  required
+                />
+              </div>
+            )}
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="isAdmin"
+                checked={currentUser.isAdmin || false}
+                onCheckedChange={(checked) => setCurrentUser((u) => ({ ...u, isAdmin: checked }))}
+              />
+              <Label htmlFor="isAdmin">Admin User</Label>
+            </div>
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={isSubmitting}>
+                Cancel
+              </Button>
+              <Button onClick={handleSubmit} disabled={isSubmitting}>
+                {isSubmitting ? "Processing..." : formMode === "create" ? "Create" : "Update"}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </ProtectedRoute>
   );
 };
