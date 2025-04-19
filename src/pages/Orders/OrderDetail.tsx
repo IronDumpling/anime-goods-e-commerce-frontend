@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useAuth } from '@/context/AuthContext';
+
 import { get } from "@/lib/api"; 
+import { addOrderTotal } from '@/lib/utils';
 import { Product, Order } from '@/lib/types';
+
+import { useAuth } from '@/context/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import ProtectedRoute from "@/components/layout/ProtectedRoute";
 import BackButton from '@/components/layout/BackButton';
@@ -11,7 +14,7 @@ import { Badge } from '@/components/ui/Badge';
 function OrderDetail() {
   const { orderId } = useParams();
   const { user } = useAuth();
-  const [order, setOrder] = useState<Order | null>(null);
+  const [order, setOrder] = useState<(Order & { total: number }) | null>(null);
   const [products, setProducts] = useState<Record<number, Product>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +36,7 @@ function OrderDetail() {
           return;
         }
 
-        setOrder(orderData);
+        setOrder(addOrderTotal(orderData));
 
         // Fetch product details for each item in the order
         const productPromises = orderData.orderItems.map(item =>
@@ -42,9 +45,9 @@ function OrderDetail() {
         const productResults = await Promise.all(productPromises);
 
         const productMap: Record<number, Product> = {};
-        productResults.forEach(product => {
-          if (product) {
-            productMap[product.id] = product;
+        productResults.forEach(result => {
+          if (result && result.data) {
+            productMap[result.data.id] = result.data;
           }
         });
         setProducts(productMap);

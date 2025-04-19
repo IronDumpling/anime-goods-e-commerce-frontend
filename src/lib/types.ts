@@ -31,7 +31,6 @@ export interface Order {
   userId: number;
   user: User;
   orderItems: OrderItem[];
-  total: number | null | undefined;
   status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
   createdAt: string;
   updateAt: string;

@@ -3,6 +3,7 @@ import { Link, useParams } from 'react-router-dom';
 
 import { useAuth } from '@/context/AuthContext';
 import { Order } from '@/lib/types';
+import { addOrderTotal } from '@/lib/utils';
 import { get } from "@/lib/api";
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -13,7 +14,7 @@ import { Badge } from '@/components/ui/Badge';
 function UserOrders() {
   const { user } = useAuth();
   const { userId } = useParams();
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<(Order & { total: number })[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,7 +29,7 @@ function UserOrders() {
           throw response.error || { error: "Unknown Error UserOrders"};
         }
         data = response.data;
-        setOrders(data);
+        setOrders(data.map(addOrderTotal));
       } catch (err) {
         setError('Failed to load orders');
         console.error('Error fetching orders:', err);
