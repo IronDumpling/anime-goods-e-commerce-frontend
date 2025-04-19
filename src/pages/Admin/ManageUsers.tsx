@@ -37,7 +37,8 @@ import {
 } from "@/components/ui/table";
 // import { mockApi, User } from '@/lib/mock';
 import { get } from "@/lib/api";
-import { User } from "@/context/AuthContext";
+import { User } from "@/lib/types";
+
 
 const columns: ColumnDef<User>[] = [
   {

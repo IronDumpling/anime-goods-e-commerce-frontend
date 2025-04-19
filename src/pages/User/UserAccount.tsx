@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
 import { cn } from "@/lib/utils";
-import { useAuth, User } from "@/context/AuthContext";
+import { User } from "@/lib/types";
+import { useAuth } from "@/context/AuthContext";
 
 import { ArrowLeft } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
@@ -70,7 +71,7 @@ function UserAccount() {
     return (
       <Card className="w-full max-w-md p-6">
         <h3 className="text-lg font-medium mb-2">{fieldLabel}</h3>
-    
+
         {visibleField === "password" ? (
           <>
             <Input type="password" placeholder="Current password" className="mb-2 text-left" />
@@ -96,7 +97,7 @@ function UserAccount() {
           </>
         )}
       </Card>
-    );        
+    );
   };
 
   return (
@@ -127,7 +128,7 @@ function UserAccount() {
                   <h4 className="font-medium text-sm text-left">First Name</h4>
                   <p className="text-muted-foreground text-sm text-left">{user?.firstName}</p>
                 </div>
-                <Button variant="outline" onClick={() => setEditField("firstName")}>Edit</Button> 
+                <Button variant="outline" onClick={() => setEditField("firstName")}>Edit</Button>
               </div>
 
               <div className="mb-6 border-b pb-4 flex justify-between items-center">
@@ -135,7 +136,7 @@ function UserAccount() {
                   <h4 className="font-medium text-sm text-left">Last Name</h4>
                   <p className="text-muted-foreground text-sm text-left">{user?.lastName}</p>
                 </div>
-                <Button variant="outline" onClick={() => setEditField("lastName")}>Edit</Button> 
+                <Button variant="outline" onClick={() => setEditField("lastName")}>Edit</Button>
               </div>
 
               <div className="mb-6 border-b pb-4 flex justify-between items-center">

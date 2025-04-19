@@ -2,6 +2,8 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from './context/CartContext';
 import Layout from "./components/layout/Layout";
+import { Toaster, toast } from "sonner";
+import { useEffect } from "react";
 
 import ProductList from "./pages/Products/ProductList";
 import ProductDetail from "./pages/Products/ProductDetail";
@@ -25,9 +27,56 @@ import ManageOrders from "./pages/Admin/ManageOrders";
 import './App.css'
 
 function App() {
+  useEffect(() => {
+    const handleError = (event: ErrorEvent) => {
+      event.preventDefault();
+      const error = event.error;
+      let message = "An unexpected error occurred";
+
+      if (error instanceof Error) {
+        message = error.message;
+      } else if (typeof error === 'object' && error !== null) {
+        if ('error' in error) {
+          message = (error as { error: string }).error;
+        } else if ('message' in error) {
+          message = (error as { message: string }).message;
+        }
+      }
+
+      toast.error(message);
+    };
+
+    const handleRejection = (event: PromiseRejectionEvent) => {
+      event.preventDefault();
+      const error = event.reason;
+      let message = "An unexpected error occurred";
+
+      if (error instanceof Error) {
+        message = error.message;
+      } else if (typeof error === 'object' && error !== null) {
+        if ('error' in error) {
+          message = (error as { error: string }).error;
+        } else if ('message' in error) {
+          message = (error as { message: string }).message;
+        }
+      }
+
+      toast.error(message);
+    };
+
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', handleRejection);
+
+    return () => {
+      window.removeEventListener('error', handleError);
+      window.removeEventListener('unhandledrejection', handleRejection);
+    };
+  }, []);
+
   return (
     <CartProvider>
       <AuthProvider>
+        <Toaster richColors position="top-center" />
         <Routes>
           <Route path="/" element={<Layout />}>
             {/* Redirect root to products */}
