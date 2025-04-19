@@ -4,6 +4,7 @@ import { get } from "@/lib/api";
 import { Product } from '@/lib/types'
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
+import BackButton from '@/components/layout/BackButton';
 import { ImageOff, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 
@@ -54,6 +55,7 @@ function ProductDetail() {
 
   return (
     <div className="container mx-auto px-4 py-10">
+      <BackButton to={`/products`} label="Back to Product List" />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="aspect-square relative bg-muted rounded-lg">
           {!imageError ? (
@@ -84,19 +86,10 @@ function ProductDetail() {
             <Button
               className="flex-1"
               disabled={product.stock === 0}
-              onClick={() => {
-                console.log("Add to Cart!");
-                addItem(product);
-              }}
+              onClick={() => addItem(product)}
             >
               <ShoppingCart className="mr-2 h-5 w-5" />
               Add to Cart
-            </Button>
-            <Button
-              className="flex-1"
-              disabled={product.stock === 0}
-            >
-              Buy Now
             </Button>
           </div>
         </div>

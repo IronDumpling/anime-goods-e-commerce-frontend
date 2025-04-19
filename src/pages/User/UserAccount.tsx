@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 
 import ProtectedRoute from "@/components/layout/ProtectedRoute";
+import BackButton from '@/components/layout/BackButton';
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
@@ -8,7 +9,6 @@ import { cn } from "@/lib/utils";
 import { User } from "@/lib/types";
 import { useAuth } from "@/context/AuthContext";
 
-import { ArrowLeft } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
 
 type EditType = "firstName" | "lastName" | "email" | "password" | "address" | null;
@@ -103,13 +103,7 @@ function UserAccount() {
   return (
     <ProtectedRoute accessLevel="self">
       <div className="container mx-auto px-4 py-10">
-        <button
-          className="flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
-          onClick={() => navigate(`/user/${userId}`)}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" /> Back to User Page
-        </button>
-
+        <BackButton to={`/user/${userId}`} label="Back to User Page" />
         <div
           className={cn(
             "flex flex-col md:flex-row gap-6 transition-all duration-300",

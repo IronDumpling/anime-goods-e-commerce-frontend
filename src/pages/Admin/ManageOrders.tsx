@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowLeft } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 import { get } from "@/lib/api";
 import ProtectedRoute from '@/components/layout/ProtectedRoute';
 import {
@@ -17,6 +15,7 @@ import {
 } from "@tanstack/react-table";
 import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
 
+import BackButton from '@/components/layout/BackButton';
 import { Button } from "@/components/ui/Button";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
@@ -127,7 +126,6 @@ const columns: ColumnDef<Order>[] = [
 ];
 
 const ManageOrders: React.FC = () => {
-  const navigate = useNavigate();
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -188,12 +186,7 @@ const ManageOrders: React.FC = () => {
   return (
     <ProtectedRoute accessLevel="admin">
       <div className="container mx-auto py-10">
-        <button
-          className="flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
-          onClick={() => navigate(`/admin`)}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" /> Back to Admin Page
-        </button>
+        <BackButton to={`/admin`} label="Back to Admin Page" />
         <h1 className="text-2xl font-bold mb-6">Manage Orders</h1>
         <div className="w-full">
           <div className="flex items-center py-4">

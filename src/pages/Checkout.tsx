@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
+import BackButton from '@/components/layout/BackButton';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import ProtectedRoute from '@/components/layout/ProtectedRoute';
 
@@ -41,6 +42,7 @@ const Checkout: React.FC = () => {
   return (
     <ProtectedRoute accessLevel="user">
       <div className="container mx-auto px-4 py-10">
+        <BackButton to={`/cart`} label="Back to Shopping Cart" />
         <h1 className="text-3xl font-bold mb-6">Checkout</h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

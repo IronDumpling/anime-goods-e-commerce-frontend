@@ -6,6 +6,7 @@ import { get } from "@/lib/api";
 import { Product } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import ProtectedRoute from "@/components/layout/ProtectedRoute";
+import BackButton from '@/components/layout/BackButton';
 import { Badge } from '@/components/ui/Badge';
 
 function OrderDetail() {

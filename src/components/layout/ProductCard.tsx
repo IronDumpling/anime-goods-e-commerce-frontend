@@ -56,13 +56,6 @@ export function ProductCard({ product }: ProductCardProps) {
           <ShoppingCart className="mr-2 h-4 w-4" />
           Add to Cart
         </Button>
-        <Button
-          size="sm"
-          className="text-primary-foreground"
-          disabled={product.stock <= 0}
-        >
-          Buy Now
-        </Button>
       </div>
     </div>
   );

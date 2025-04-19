@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, ReactNode } from 'react';
 import { Product } from '@/lib/types';
+import { toast } from "sonner";
 
 export interface CartItem {
   product: Product;
@@ -25,6 +26,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
 
   const addItem = (product: Product) => {
+    toast.success("Add product to cart!");
     setItems(prev => {
       console.log("Prev = ", prev);
       const existingItem = prev.find(item => item.product.id === product.id);

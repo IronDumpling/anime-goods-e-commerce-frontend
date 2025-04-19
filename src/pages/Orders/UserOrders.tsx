@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft } from "lucide-react";
+import { Link, useParams } from 'react-router-dom';
 
 import { useAuth } from '@/context/AuthContext';
 import { Order } from '@/lib/mock';
@@ -8,12 +7,12 @@ import { get } from "@/lib/api";
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import ProtectedRoute from "@/components/layout/ProtectedRoute";
+import BackButton from '@/components/layout/BackButton';
 import { Badge } from '@/components/ui/Badge';
 
 function UserOrders() {
   const { user } = useAuth();
   const { userId } = useParams();
-  const navigate = useNavigate();
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -62,12 +61,7 @@ function UserOrders() {
   if (orders.length === 0) {
     return (
       <div className="container mx-auto px-4 py-10">
-        <button
-          className="flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
-          onClick={() => navigate(`/user/${userId}`)}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" /> Back to User Page
-        </button>
+        <BackButton to={`/user/${userId}`} label="Back to User Page" />
         <h1 className="text-2xl font-bold mb-6">Your Orders</h1>
         <div className="text-center">
           <p className="mb-4">You haven't placed any orders yet.</p>
@@ -82,12 +76,7 @@ function UserOrders() {
   return (
     <ProtectedRoute accessLevel="self">
       <div className="container mx-auto px-4 py-10">
-        <button
-          className="flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
-          onClick={() => navigate(`/user/${userId}`)}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" /> Back to User Page
-        </button>
+        <BackButton to={`/user/${userId}`} label="Back to User Page" />
         <h1 className="text-2xl font-bold mb-6">Your Orders</h1>
         <div className="space-y-6">
           {orders.map((order) => (
