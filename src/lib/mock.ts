@@ -1,17 +1,17 @@
 // Types
-export interface User {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  address: string;
-  isAdmin: boolean;
-}
+// export interface User {
+//   id: number;
+//   firstName: string;
+//   lastName: string;
+//   email: string;
+//   address: string;
+//   isAdmin: boolean;
+// }
 
 // Internal type for user data with password
-interface UserWithPassword extends User {
-  password: string;
-}
+// interface UserWithPassword extends User {
+//   password: string;
+// }
 
 export interface Product {
   id: number;
@@ -43,51 +43,51 @@ export interface ProductCategory {
   desc: string;
 }
 
-// Mock Data
-const mockUsersWithPassword: UserWithPassword[] = [
-  {
-    id: 1,
-    username: "admin",
-    email: "admin@example.com",
-    role: "admin",
-    status: "active",
-    createdAt: "2024-01-01",
-    password: "admin123"
-  },
-  {
-    id: 2,
-    username: "anime_lover",
-    email: "anime_lover@example.com",
-    role: "user",
-    status: "active",
-    createdAt: "2024-01-02",
-    password: "anime123"
-  },
-  {
-    id: 3,
-    username: "manga_reader",
-    email: "manga_reader@example.com",
-    role: "user",
-    status: "active",
-    createdAt: "2024-01-03",
-    password: "manga123"
-  },
-  {
-    id: 4,
-    username: "cosplay_fan",
-    email: "cosplay_fan@example.com",
-    role: "user",
-    status: "inactive",
-    createdAt: "2024-01-04",
-    password: "cosplay123"
-  },
-];
+// // Mock Data
+// const mockUsersWithPassword: UserWithPassword[] = [
+//   {
+//     id: 1,
+//     username: "admin",
+//     email: "admin@example.com",
+//     role: "admin",
+//     status: "active",
+//     createdAt: "2024-01-01",
+//     password: "admin123"
+//   },
+//   {
+//     id: 2,
+//     username: "anime_lover",
+//     email: "anime_lover@example.com",
+//     role: "user",
+//     status: "active",
+//     createdAt: "2024-01-02",
+//     password: "anime123"
+//   },
+//   {
+//     id: 3,
+//     username: "manga_reader",
+//     email: "manga_reader@example.com",
+//     role: "user",
+//     status: "active",
+//     createdAt: "2024-01-03",
+//     password: "manga123"
+//   },
+//   {
+//     id: 4,
+//     username: "cosplay_fan",
+//     email: "cosplay_fan@example.com",
+//     role: "user",
+//     status: "inactive",
+//     createdAt: "2024-01-04",
+//     password: "cosplay123"
+//   },
+// ];
 
-// Helper function to convert UserWithPassword to User
-const toUser = (userWithPassword: UserWithPassword): User => {
-  const { password, ...user } = userWithPassword;
-  return user;
-};
+// // Helper function to convert UserWithPassword to User
+// const toUser = (userWithPassword: UserWithPassword): User => {
+//   const { password, ...user } = userWithPassword;
+//   return user;
+// };
 
 export const mockProducts: Product[] = [
   {
@@ -308,75 +308,75 @@ export const mockProductCategories: ProductCategory[] = [
 
 // Mock API Functions
 export const mockApi = {
-  // User API
-  users: {
-    getAll: async (): Promise<User[]> => {
-      return new Promise((resolve) => {
-        setTimeout(() => resolve(mockUsersWithPassword.map(toUser)), 500);
-      });
-    },
-    getById: async (id: number): Promise<User | undefined> => {
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          const userWithPassword = mockUsersWithPassword.find(u => u.id === id);
-          resolve(userWithPassword ? toUser(userWithPassword) : undefined);
-        }, 500);
-      });
-    },
-    create: async (userData: Omit<User, 'id' | 'createdAt'>, password?: string): Promise<User> => {
-      return new Promise((resolve, reject) => {
-        // Check for duplicate email
-        if (mockUsersWithPassword.some(u => u.email === userData.email)) {
-          reject(new Error('Email already exists'));
-          return;
-        }
+  // // User API
+  // users: {
+  //   getAll: async (): Promise<User[]> => {
+  //     return new Promise((resolve) => {
+  //       setTimeout(() => resolve(mockUsersWithPassword.map(toUser)), 500);
+  //     });
+  //   },
+  //   getById: async (id: number): Promise<User | undefined> => {
+  //     return new Promise((resolve) => {
+  //       setTimeout(() => {
+  //         const userWithPassword = mockUsersWithPassword.find(u => u.id === id);
+  //         resolve(userWithPassword ? toUser(userWithPassword) : undefined);
+  //       }, 500);
+  //     });
+  //   },
+  //   create: async (userData: Omit<User, 'id' | 'createdAt'>, password?: string): Promise<User> => {
+  //     return new Promise((resolve, reject) => {
+  //       // Check for duplicate email
+  //       if (mockUsersWithPassword.some(u => u.email === userData.email)) {
+  //         reject(new Error('Email already exists'));
+  //         return;
+  //       }
 
-        // Set default values for new users
-        const newUserWithPassword: UserWithPassword = {
-          ...userData,
-          id: mockUsersWithPassword.length + 1,
-          createdAt: new Date().toISOString().split('T')[0],
-          role: userData.role || 'user',
-          status: userData.status || 'active',
-          password: password || '' // Use provided password or empty string
-        };
+  //       // Set default values for new users
+  //       const newUserWithPassword: UserWithPassword = {
+  //         ...userData,
+  //         id: mockUsersWithPassword.length + 1,
+  //         createdAt: new Date().toISOString().split('T')[0],
+  //         role: userData.role || 'user',
+  //         status: userData.status || 'active',
+  //         password: password || '' // Use provided password or empty string
+  //       };
 
-        mockUsersWithPassword.push(newUserWithPassword);
-        setTimeout(() => resolve(toUser(newUserWithPassword)), 500);
-      });
-    },
-    update: async (id: number, userData: Partial<User>): Promise<User | undefined> => {
-      return new Promise((resolve, reject) => {
-        const index = mockUsersWithPassword.findIndex(user => user.id === id);
-        if (index !== -1) {
-          // Check if email is being updated and if it already exists
-          if (userData.email && userData.email !== mockUsersWithPassword[index].email) {
-            if (mockUsersWithPassword.some(u => u.email === userData.email)) {
-              reject(new Error('Email already exists'));
-              return;
-            }
-          }
+  //       mockUsersWithPassword.push(newUserWithPassword);
+  //       setTimeout(() => resolve(toUser(newUserWithPassword)), 500);
+  //     });
+  //   },
+  //   update: async (id: number, userData: Partial<User>): Promise<User | undefined> => {
+  //     return new Promise((resolve, reject) => {
+  //       const index = mockUsersWithPassword.findIndex(user => user.id === id);
+  //       if (index !== -1) {
+  //         // Check if email is being updated and if it already exists
+  //         if (userData.email && userData.email !== mockUsersWithPassword[index].email) {
+  //           if (mockUsersWithPassword.some(u => u.email === userData.email)) {
+  //             reject(new Error('Email already exists'));
+  //             return;
+  //           }
+  //         }
 
-          const updatedUserWithPassword = { ...mockUsersWithPassword[index], ...userData };
-          mockUsersWithPassword[index] = updatedUserWithPassword;
-          setTimeout(() => resolve(toUser(updatedUserWithPassword)), 500);
-        } else {
-          setTimeout(() => resolve(undefined), 500);
-        }
-      });
-    },
-    delete: async (id: number): Promise<boolean> => {
-      return new Promise((resolve) => {
-        const index = mockUsersWithPassword.findIndex(user => user.id === id);
-        if (index !== -1) {
-          mockUsersWithPassword.splice(index, 1);
-          setTimeout(() => resolve(true), 500);
-        } else {
-          setTimeout(() => resolve(false), 500);
-        }
-      });
-    },
-  },
+  //         const updatedUserWithPassword = { ...mockUsersWithPassword[index], ...userData };
+  //         mockUsersWithPassword[index] = updatedUserWithPassword;
+  //         setTimeout(() => resolve(toUser(updatedUserWithPassword)), 500);
+  //       } else {
+  //         setTimeout(() => resolve(undefined), 500);
+  //       }
+  //     });
+  //   },
+  //   delete: async (id: number): Promise<boolean> => {
+  //     return new Promise((resolve) => {
+  //       const index = mockUsersWithPassword.findIndex(user => user.id === id);
+  //       if (index !== -1) {
+  //         mockUsersWithPassword.splice(index, 1);
+  //         setTimeout(() => resolve(true), 500);
+  //       } else {
+  //         setTimeout(() => resolve(false), 500);
+  //       }
+  //     });
+  //   },
+  // },
 
   // Product API
   products: {
@@ -482,33 +482,33 @@ export const mockApi = {
 
   // Auth API
   auth: {
-    login: async (email: string, password: string): Promise<{ token: string; user: User }> => {
-      return new Promise((resolve, reject) => {
-        setTimeout(() => {
-          const userWithPassword = mockUsersWithPassword.find(
-            u => u.email === email && u.password === password
-          );
-          if (userWithPassword) {
-            const token = `mock_token_${Date.now()}`;
-            resolve({ token, user: toUser(userWithPassword) });
-          } else {
-            reject(new Error('Invalid credentials'));
-          }
-        }, 500);
-      });
-    },
-    register: async (username: string, email: string, password: string): Promise<User> => {
-      try {
-        // Use users.create with default role and status for new registrations
-        return await mockApi.users.create({
-          username,
-          email,
-          role: 'user',
-          status: 'active'
-        }, password);
-      } catch (error) {
-        throw error;
-      }
-    },
+    // login: async (email: string, password: string): Promise<{ token: string; user: User }> => {
+    //   return new Promise((resolve, reject) => {
+    //     setTimeout(() => {
+    //       const userWithPassword = mockUsersWithPassword.find(
+    //         u => u.email === email && u.password === password
+    //       );
+    //       if (userWithPassword) {
+    //         const token = `mock_token_${Date.now()}`;
+    //         resolve({ token, user: toUser(userWithPassword) });
+    //       } else {
+    //         reject(new Error('Invalid credentials'));
+    //       }
+    //     }, 500);
+    //   });
+    // },
+    // register: async (username: string, email: string, password: string): Promise<User> => {
+    //   try {
+    //     // Use users.create with default role and status for new registrations
+    //     return await mockApi.users.create({
+    //       username,
+    //       email,
+    //       role: 'user',
+    //       status: 'active'
+    //     }, password);
+    //   } catch (error) {
+    //     throw error;
+    //   }
+    // },
   },
 };

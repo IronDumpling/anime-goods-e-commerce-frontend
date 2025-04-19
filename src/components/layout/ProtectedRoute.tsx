@@ -16,7 +16,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   accessLevel,
   fallbackPath
 }) => {
-  const { isLoggedIn, isAdmin, user } = useAuth();
+  const { user } = useAuth();
+  const isLoggedIn = user !== null;
+  const isAdmin = user?.isAdmin;
   const location = useLocation();
   const currentPath = location.pathname;
   const { userId } = useParams();

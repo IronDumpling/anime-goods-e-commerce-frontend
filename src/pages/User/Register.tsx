@@ -5,10 +5,11 @@ import { Button } from "@/components/ui/Button";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ApiError } from "@/lib/api";
 
 function Register() {
-  const [firstname, setFirstname] = useState("");
-  const [lastname, setLastname] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -26,10 +27,23 @@ function Register() {
     }
 
     try {
-      await register(firstname, lastname, email, password);
+      await register(firstName, lastName, email, password);
       navigate('/');
-    } catch (err) {
-      setError("Registration failed. Please try again.");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else if (typeof err === 'object' && err !== null) {
+        const apiError = err as ApiError;
+        if (apiError.error && apiError.details) {
+          setError(`${apiError.error}: ${apiError.details}`);
+        } else if (apiError.error) {
+          setError("Registration failed: " + apiError.error);
+        } else {
+          setError("Registration failed: An unknown error occurred");
+        }
+      } else {
+        setError("Registration failed: An unknown error occurred");
+      }
     }
   };
 
@@ -50,15 +64,29 @@ function Register() {
               </Alert>
             )}
             <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="username" className="text-sm font-medium text-right">
-                Username
+              <label htmlFor="firstName" className="text-sm font-medium text-right">
+                First Name
               </label>
               <Input
-                id="username"
+                id="firstName"
                 type="text"
-                placeholder="Choose a username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter your first name"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                required
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="lastName" className="text-sm font-medium text-right">
+                Last Name
+              </label>
+              <Input
+                id="lastName"
+                type="text"
+                placeholder="Enter your last name"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
                 required
                 className="col-span-3"
               />

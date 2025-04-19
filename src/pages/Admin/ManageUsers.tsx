@@ -35,7 +35,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { mockApi, User } from '@/lib/mock';
+// import { mockApi, User } from '@/lib/mock';
+import { get } from "@/lib/api";
+import { User } from "@/context/AuthContext";
 
 const columns: ColumnDef<User>[] = [
   {
@@ -79,20 +81,37 @@ const columns: ColumnDef<User>[] = [
     },
   },
   {
-    accessorKey: "username",
+    accessorKey: "firstName",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Username
+          First Name
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       )
     },
     filterFn: (row, _columnId, value) => {
-      return row.getValue<string>("username").toLowerCase().includes((value as string).toLowerCase());
+      return row.getValue<string>("firstName").toLowerCase().includes((value as string).toLowerCase());
+    },
+  },
+  {
+    accessorKey: "lastName",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Last Name
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
+    filterFn: (row, _columnId, value) => {
+      return row.getValue<string>("lastName").toLowerCase().includes((value as string).toLowerCase());
     },
   },
   {
@@ -113,22 +132,11 @@ const columns: ColumnDef<User>[] = [
     },
   },
   {
-    accessorKey: "role",
+    accessorKey: "isAdmin",
     header: "Role",
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("role")}</div>
+      <div className="capitalize">{row.getValue("isAdmin") ? "Admin" : "User"}</div>
     ),
-  },
-  {
-    accessorKey: "status",
-    header: "Status",
-    cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("status")}</div>
-    ),
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Created At",
   },
   {
     id: "actions",
@@ -186,9 +194,15 @@ const ManageUsers: React.FC = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const data = await '/api/user/allCustomers';
+        const response = await get<Array<User>>("/api/user/allCustomers");
+        let data: Array<User>;
+        if (response.error || !response.data) {
+          throw response.error || { error: "Unknown Error ManageUsers"};
+        }
+        data = response.data;
         setUsers(data);
       } catch (error) {
+        // TODO(yushun): Maybe we want to use a toast to show error
         console.error('Error fetching users:', error);
       } finally {
         setIsLoading(false);
@@ -221,7 +235,8 @@ const ManageUsers: React.FC = () => {
       const searchValue = value.toLowerCase();
       return (
         row.getValue<number>("id").toString().includes(searchValue) ||
-        row.getValue<string>("username").toLowerCase().includes(searchValue) ||
+        row.getValue<string>("firstName").toLowerCase().includes(searchValue) ||
+        row.getValue<string>("lastName").toLowerCase().includes(searchValue) ||
         row.getValue<string>("email").toLowerCase().includes(searchValue)
       );
     },
@@ -240,7 +255,7 @@ const ManageUsers: React.FC = () => {
         <div className="w-full">
           <div className="flex items-center py-4">
             <Input
-              placeholder="Search by ID, username, or email..."
+              placeholder="Search by ID, first name, last name, or email..."
               value={globalFilter}
               onChange={(event) => setGlobalFilter(event.target.value)}
               className="max-w-sm"
