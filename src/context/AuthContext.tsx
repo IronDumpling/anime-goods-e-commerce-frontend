@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { post } from '@/lib/api';
+import { post, put } from '@/lib/api';
 
 export interface User {
   id: number;
@@ -16,6 +16,7 @@ interface AuthContextState {
   login: (email: string, password: string) => Promise<void>;
   register: (firstName: string, lastName: string, email: string, password: string) => Promise<void>;
   logout: () => void;
+  updateUser: (user: User) => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextState | undefined>(undefined);
@@ -83,8 +84,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem('user');
   };
 
+  const updateUser = async (user: User) => {
+    const response = await put<User>(`/api/user/${user.id}`, {
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      address: user.address,
+      isAdmin: user.isAdmin
+    });
+    if (response.error) {
+      throw response.error;
+    }
+    if (response.data) {
+      setUser(response.data);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ token, user, login, register, logout }}>
+    <AuthContext.Provider
+      value={{
+        token,
+        user,
+        login,
+        register,
+        logout,
+        updateUser
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
