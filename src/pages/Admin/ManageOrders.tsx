@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { get } from "@/lib/api";
 import ProtectedRoute from '@/components/layout/ProtectedRoute';
 import {
   ColumnDef,
@@ -48,7 +49,7 @@ interface Order {
   orderId: number;
   userId: number;
   userName: string;
-  status: 'pending' | 'paid' | 'shipped' | 'completed';
+  status: 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
   createdAt: string;
   updatedAt: string;
   items: OrderItem[];
@@ -137,50 +138,20 @@ const ManageOrders: React.FC = () => {
 
   useEffect(() => {
     const fetchOrders = async () => {
-      setOrders([
-        {
-          orderId: 10001,
-          userId: 1,
-          userName: 'Charlie Zhang',
-          status: 'pending',
-          createdAt: '2024-04-01T10:30:00Z',
-          updatedAt: '2024-04-02T12:00:00Z',
-          items: [
-            {
-              orderItemId: 1,
-              productId: 301,
-              productName: 'Anime Figure - Naruto',
-              quantity: 2,
-              unitPrice: 45.99,
-            },
-            {
-              orderItemId: 2,
-              productId: 302,
-              productName: 'One Piece Poster',
-              quantity: 1,
-              unitPrice: 12.5,
-            },
-          ],
-        },
-        {
-          orderId: 10002,
-          userId: 2,
-          userName: 'Alice Wu',
-          status: 'shipped',
-          createdAt: '2024-04-02T14:00:00Z',
-          updatedAt: '2024-04-04T16:30:00Z',
-          items: [
-            {
-              orderItemId: 3,
-              productId: 303,
-              productName: 'Attack on Titan T-shirt',
-              quantity: 1,
-              unitPrice: 25.0,
-            },
-          ],
-        },
-      ]);
-      setIsLoading(false);
+      try {
+        const response = await get<Array<Order>>("/api/order");
+        let data: Array<Order>;
+        if (response.error || !response.data) {
+          throw response.error || { error: "Unknown Error ManageUsers"};
+        }
+        data = response.data;
+        setOrders(data);
+      } catch (error) {
+        // TODO(yushun): Maybe we want to use a toast to show error
+        console.error('Error fetching orders:', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
 
     fetchOrders();
