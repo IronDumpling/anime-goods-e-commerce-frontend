@@ -75,6 +75,7 @@ const ManageProducts: React.FC = () => {
 
   const handleSubmit = async () => {
     try {
+      // Handle Invalid Product Alert
       const payload = {
         name: currentProduct.name || "",
         brand: currentProduct.brand || "",
@@ -94,7 +95,7 @@ const ManageProducts: React.FC = () => {
 
       setDialogOpen(false);
       setIsLoading(true);
-      const refreshed = await get<{ products: Product[] }>("/api/product?take=100");
+      const refreshed = await get<{ products: Product[] }>("/api/product");
       if (!refreshed.data) throw new Error("Missing response data");
       setProducts(refreshed.data?.products || []);
     } catch (e) {
@@ -201,7 +202,7 @@ const ManageProducts: React.FC = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await get<{ products: Product[] }>("/api/product?take=100");
+        const response = await get<{ products: Product[] }>("/api/product");
         if (response.error || !response.data) {
           throw response.error || { error: "Unknown Error Fetching Products" };
         }

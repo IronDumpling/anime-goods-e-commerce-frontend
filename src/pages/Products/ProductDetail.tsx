@@ -1,10 +1,23 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { mockApi, Product } from '@/lib/mock';
+import { get } from "@/lib/api"; 
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { ImageOff, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+
+interface Product {
+  id: number;
+  name: string;
+  brand: string;
+  description: string;
+  price: number;
+  stock: number;
+  status: 'ACTIVE' | 'INACTIVE' | 'DISCONTINUED';
+  imageURL: string,
+  category: string,
+  createdAt: string;
+}
 
 function ProductDetail() {
   const { productId } = useParams();
@@ -17,9 +30,10 @@ function ProductDetail() {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const data = await mockApi.products.getById(Number(productId));
-        if (data) {
-          setProduct(data);
+        const res = await get<Product>("/api/product/" + Number(productId));
+
+        if (res) {
+          setProduct(res.data || null);
         } else {
           setError('Product not found');
         }
@@ -56,8 +70,8 @@ function ProductDetail() {
         <div className="aspect-square relative bg-muted rounded-lg">
           {!imageError ? (
             <img
-              src={product.image}
-              alt={product.title}
+              src={product.imageURL}
+              alt={product.name}
               className="w-full h-full object-cover rounded-lg"
               onError={() => setImageError(true)}
             />
@@ -68,7 +82,7 @@ function ProductDetail() {
           )}
         </div>
         <div>
-          <h1 className="text-3xl font-bold mb-2">{product.title}</h1>
+          <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
           <Badge className="mb-4">{product.category}</Badge>
           <p className="text-2xl font-bold text-primary mb-4">${product.price.toFixed(2)}</p>
           <p className="text-muted-foreground mb-6">{product.description}</p>
