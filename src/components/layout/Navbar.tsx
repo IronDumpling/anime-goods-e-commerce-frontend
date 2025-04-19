@@ -100,12 +100,14 @@ function CartPreviewItem({ item }: CartPreviewItemProps) {
 
 function CartPreview() {
   const navigate = useNavigate();
-  const { items: cartItems } = useCart();
+  const { items: cartItems, isLoading } = useCart();
   const totalPrice = cartItems.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
 
   return (
     <div className="w-[300px] p-4">
-      {cartItems.length === 0 ? (
+      {isLoading ? (
+        <p className="text-sm text-muted-foreground text-center py-4">Loading cart...</p>
+      ) : cartItems.length === 0 ? (
         <p className="text-sm text-muted-foreground text-center py-4">Your cart is empty</p>
       ) : (
         <>

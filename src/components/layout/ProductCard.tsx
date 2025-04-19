@@ -12,7 +12,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const [imageError, setImageError] = useState(false);
-  const { addItem } = useCart();
+  const { addItem, isLoading } = useCart();
 
   return (
     <div className="bg-card text-card-foreground rounded-xl border shadow-sm overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col">
@@ -50,16 +50,16 @@ export function ProductCard({ product }: ProductCardProps) {
         <Button
           size="sm"
           className="text-primary-foreground"
-          disabled={product.stock <= 0}
+          disabled={product.stock <= 0 || isLoading}
           onClick={() => addItem(product)}
         >
           <ShoppingCart className="mr-2 h-4 w-4" />
-          Add to Cart
+          {isLoading ? "Loading..." : "Add to Cart"}
         </Button>
         <Button
           size="sm"
           className="text-primary-foreground"
-          disabled={product.stock <= 0}
+          disabled={product.stock <= 0 || isLoading}
         >
           Buy Now
         </Button>
