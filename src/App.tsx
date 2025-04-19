@@ -2,8 +2,10 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from './context/CartContext';
 import Layout from "./components/layout/Layout";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 import { useEffect } from "react";
+import HttpError from "./components/layout/HttpError";
 
 import ProductList from "./pages/Products/ProductList";
 import ProductDetail from "./pages/Products/ProductDetail";
@@ -114,6 +116,9 @@ function App() {
               <Route path="products" element={<ManageProducts />} /> {/* Stage 2. Product Yushun */}
               <Route path="orders" element={<ManageOrders />} /> {/* Stage 3. Order Chuyue */}
             </Route>
+
+            {/* Catch all route for 404 */}
+            <Route path="*" element={<HttpError code={404} />} />
           </Route>
         </Routes>
       </AuthProvider>
