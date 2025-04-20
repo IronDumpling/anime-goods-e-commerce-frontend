@@ -49,7 +49,7 @@ function UserAccount() {
         <Card className="w-full max-w-md p-6">
           <h3 className="text-lg font-medium mb-4">Edit Address</h3>
           <div className="grid gap-3">
-            <Input placeholder="Address" defaultValue={user?.address} />
+            <Input placeholder="Address" defaultValue={user?.address} ref={inputRef} />
           </div>
           <div className="flex justify-end gap-2 mt-4">
             <Button variant="outline" onClick={closeEdit}>Cancel</Button>
