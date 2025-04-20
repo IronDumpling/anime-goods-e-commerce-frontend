@@ -492,7 +492,7 @@ const ManageOrders: React.FC = () => {
     },
   });
 
-  const handleExportToExcel = () => {
+  const handleExportOrders = () => {
     const selectedOrders = table.getFilteredSelectedRowModel().rows.map(row => row.original);
     const ordersData = selectedOrders.map(order => ({
       'Order ID': order.id,
@@ -520,7 +520,38 @@ const ManageOrders: React.FC = () => {
     downloadExcel([
       { name: 'Orders', data: ordersData },
       { name: 'Order Items', data: orderItemsData }
-    ], 'orders-export');
+    ], 'selected-orders-export');
+  };
+
+  const handleExportAllOrders = () => {
+    const allOrders = table.getFilteredRowModel().rows.map(row => row.original);
+    const ordersData = allOrders.map(order => ({
+      'Order ID': order.id,
+      'Customer ID': order.userId,
+      'Customer Name': `${order.user?.firstName || ''} ${order.user?.lastName || ''}`,
+      'Customer Email': order.user?.email || '',
+      'Status': order.status,
+      'Created At': new Date(order.createdAt).toLocaleString(),
+      'Updated At': new Date(order.updatedAt).toLocaleString(),
+      'Total Amount': order.orderItems.reduce((sum, item) =>
+        sum + (item.quantity * item.unitPrice), 0).toFixed(2)
+    }));
+
+    const orderItemsData = allOrders.flatMap(order =>
+      order.orderItems.map(item => ({
+        'Order ID': order.id,
+        'Product ID': item.productId,
+        'Product Name': item.product?.name || '',
+        'Quantity': item.quantity,
+        'Unit Price': item.unitPrice.toFixed(2),
+        'Total Price': (item.quantity * item.unitPrice).toFixed(2)
+      }))
+    );
+
+    downloadExcel([
+      { name: 'Orders', data: ordersData },
+      { name: 'Order Items', data: orderItemsData }
+    ], 'all-orders-export');
   };
 
   return (
@@ -541,7 +572,7 @@ const ManageOrders: React.FC = () => {
         <div className="w-full">
           <div className="flex items-center py-4 space-x-4">
             <Input
-              placeholder="Search by Order ID or Customer Name..."
+              placeholder="Search by order number, customer name, or email..."
               value={globalFilter}
               onChange={(event) => setGlobalFilter(event.target.value)}
               className="max-w-sm"
@@ -566,20 +597,26 @@ const ManageOrders: React.FC = () => {
                 ))}
               </DropdownMenuContent>
             </DropdownMenu>
-            {table.getFilteredSelectedRowModel().rows.length > 0 && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline">
-                    Bulk Actions <ChevronDown className="ml-2 h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onClick={handleExportToExcel}>
-                    Export as Excel
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="ml-4">
+                  Bulk Actions <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem
+                  onClick={handleExportOrders}
+                  disabled={table.getFilteredSelectedRowModel().rows.length === 0}
+                >
+                  Export selected
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={handleExportAllOrders}
+                >
+                  Export all
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="ml-auto">

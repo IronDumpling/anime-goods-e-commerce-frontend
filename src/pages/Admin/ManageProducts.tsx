@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, ChevronDown, MoreHorizontal, FileSpreadsheet } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
 
 import {
   ColumnDef,
@@ -55,6 +56,12 @@ import { exportTableToExcel } from "@/lib/excelUtils";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { ImageUpload } from '@/components/layout/ImageUpload';
+import ExcelImportDialog from '@/components/layout/ExcelImportDialog';
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger,
+} from "@/components/ui/hover-card";
 
 const ManageProducts: React.FC = () => {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -91,6 +98,11 @@ const ManageProducts: React.FC = () => {
   } | null>(null);
 
   const [imageInputMethod, setImageInputMethod] = useState<'url' | 'upload'>('url');
+
+  // Add state for Excel import dialog
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+
+  const navigate = useNavigate();
 
   const handleSubmit = async () => {
     try {
@@ -185,6 +197,28 @@ const ManageProducts: React.FC = () => {
     {
       accessorKey: "description",
       header: "Description",
+      cell: ({ row }) => {
+        const description = row.getValue("description") as string;
+        if (!description) return <span className="text-gray-400">No description</span>;
+
+        // Truncate the description to a short length
+        const truncatedDescription = description.length > 20
+          ? `${description.substring(0, 20)}...`
+          : description;
+
+        return (
+          <HoverCard>
+            <HoverCardTrigger asChild>
+              <span className="cursor-pointer underline">
+                {truncatedDescription}
+              </span>
+            </HoverCardTrigger>
+            <HoverCardContent className="w-80 max-h-60 overflow-y-auto">
+              <p className="text-sm whitespace-pre-wrap">{description}</p>
+            </HoverCardContent>
+          </HoverCard>
+        );
+      },
     },
     {
       accessorKey: "price",
@@ -221,8 +255,8 @@ const ManageProducts: React.FC = () => {
         if (!imageURL) return <span className="text-gray-400">No image</span>;
 
         // If URL is too long, display abbreviated version
-        const displayText = imageURL.length > 30
-          ? `${imageURL.substring(0, 15)}...${imageURL.substring(imageURL.length - 15)}`
+        const displayText = imageURL.length > 20
+          ? `${imageURL.substring(0, 10)}...${imageURL.substring(imageURL.length - 10)}`
           : imageURL;
 
         // Check if it's a valid URL (starts with http or https)
@@ -275,8 +309,12 @@ const ManageProducts: React.FC = () => {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => navigator.clipboard.writeText(product.id.toString())}>Copy Product ID</DropdownMenuItem>
-              <DropdownMenuItem>View</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigator.clipboard.writeText(product.id.toString())}>
+                Copy Product ID
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate(`/products/${product.id}`)}>
+                View
+              </DropdownMenuItem>
               <DropdownMenuSub>
                 <DropdownMenuSubTrigger>Set Status</DropdownMenuSubTrigger>
                 <DropdownMenuPortal>
@@ -421,7 +459,7 @@ const ManageProducts: React.FC = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await get<{ products: Product[] }>("/api/product");
+        const response = await get<{ products: Product[] }>("/api/product?take=100");
         if (response.error || !response.data) {
           throw response.error || { error: "Unknown Error Fetching Products" };
         }
@@ -637,7 +675,91 @@ const ManageProducts: React.FC = () => {
 
   // Replace the export handler
   const handleExportProducts = () => {
-    exportTableToExcel(table, 'products-export');
+    exportTableToExcel(table, 'selected-products-export', true);
+  };
+
+  const handleExportAllProducts = () => {
+    exportTableToExcel(table, 'all-products-export', false);
+  };
+
+  const handleDeleteAll = async () => {
+    try {
+      setIsBulkDeleting(true);
+      const allRows = table.getFilteredRowModel().rows;
+
+      if (allRows.length === 0) {
+        toast.error("No products to delete");
+        return;
+      }
+
+      const results = {
+        success: 0,
+        failed: 0,
+        failedProducts: [] as { id: number; name: string; reason: string }[]
+      };
+
+      // Process each product deletion
+      for (const row of allRows) {
+        const product = row.original;
+        try {
+          const response = await del(`/api/product/${product.id}`);
+
+          if (response.error) {
+            // Check if the error is due to foreign key constraints
+            if (response.error.error && (
+              response.error.error.includes("foreign key") ||
+              response.error.error.includes("referenced")
+            )) {
+              results.failed++;
+              results.failedProducts.push({
+                id: product.id,
+                name: product.name,
+                reason: "Referenced by existing orders"
+              });
+            } else {
+              results.failed++;
+              results.failedProducts.push({
+                id: product.id,
+                name: product.name,
+                reason: "Unknown error"
+              });
+            }
+          } else {
+            results.success++;
+          }
+        } catch (error) {
+          results.failed++;
+          results.failedProducts.push({
+            id: product.id,
+            name: product.name,
+            reason: "Unknown error"
+          });
+        }
+      }
+
+      setBulkDeleteResults(results);
+
+      // Show appropriate toast message
+      if (results.success > 0) {
+        toast.success(`Successfully deleted ${results.success} product(s)`);
+      }
+
+      if (results.failed > 0) {
+        toast.error(`Failed to delete ${results.failed} product(s). See details below.`);
+      }
+
+      // Refresh the products list
+      const refreshed = await get<{ products: Product[] }>("/api/product");
+      if (refreshed.error || !refreshed.data) {
+        throw refreshed.error || { error: "Failed to refresh product data" };
+      }
+      setProducts(refreshed.data.products);
+    } catch (error) {
+      console.error("Failed to process bulk deletion:", error);
+      toast.error("An error occurred while processing the bulk deletion");
+    } finally {
+      setIsBulkDeleting(false);
+    }
   };
 
   const handleImageUploadComplete = (fileUrlMap: Record<string, string>) => {
@@ -648,20 +770,118 @@ const ManageProducts: React.FC = () => {
     }
   };
 
+  // Add function to handle product import
+  const handleImportProducts = async (data: any[]) => {
+    const results = {
+      success: [] as Product[],
+      failed: [] as { row: number; data: any; reason: string }[]
+    };
+
+    for (let i = 0; i < data.length; i++) {
+      const rowData = data[i];
+      try {
+        // Validate all required fields
+        const requiredFields = ["name", "brand", "description", "price", "imageURL", "stock", "status", "category"];
+        const missingFields = requiredFields.filter(field => !rowData[field]);
+
+        if (missingFields.length > 0) {
+          results.failed.push({
+            row: i + 2, // +2 because of 0-indexing and header row
+            data: rowData,
+            reason: `Missing required fields: ${missingFields.join(', ')}`
+          });
+          continue;
+        }
+
+        // Validate price and stock are numbers
+        if (isNaN(Number(rowData.price)) || isNaN(Number(rowData.stock))) {
+          results.failed.push({
+            row: i + 2,
+            data: rowData,
+            reason: "Price and stock must be numbers"
+          });
+          continue;
+        }
+
+        // Validate status
+        if (!["ACTIVE", "INACTIVE", "DISCONTINUED"].includes(rowData.status)) {
+          results.failed.push({
+            row: i + 2,
+            data: rowData,
+            reason: "Invalid status value. Must be ACTIVE, INACTIVE, or DISCONTINUED"
+          });
+          continue;
+        }
+
+        // Create the product
+        const response = await post("/api/product", {
+          name: rowData.name,
+          brand: rowData.brand,
+          description: rowData.description,
+          price: Number(rowData.price),
+          imageURL: rowData.imageURL,
+          stock: Number(rowData.stock),
+          status: rowData.status,
+          category: rowData.category
+        });
+
+        if (response.error) {
+          results.failed.push({
+            row: i + 2,
+            data: rowData,
+            reason: response.error.error || "Failed to create product"
+          });
+        } else if (response.data) {
+          // Cast the response data to Product type
+          results.success.push(response.data as Product);
+        }
+      } catch (error) {
+        console.error("Failed to import product:", error);
+        results.failed.push({
+          row: i + 2,
+          data: rowData,
+          reason: "An error occurred while creating the product"
+        });
+      }
+    }
+
+    // Refresh the products list if any were successfully imported
+    if (results.success.length > 0) {
+      const refreshed = await get<{ products: Product[] }>("/api/product");
+      if (refreshed.error || !refreshed.data) {
+        console.error("Failed to refresh product data:", refreshed.error);
+      } else {
+        setProducts(refreshed.data.products);
+      }
+    }
+
+    return results;
+  };
+
   return (
     <ProtectedRoute accessLevel="admin">
       <div className="container mx-auto py-10">
         <BackButton to={`/admin`} label="Back to Admin Page" />
         <h1 className="text-2xl font-bold mb-6">Manage Products</h1>
-        <Button
-          onClick={() => {
-            setCurrentProduct({});
-            setFormMode("create");
-            setDialogOpen(true);
-          }}
-        >
-          + Add Product
-        </Button>
+        <div className="flex space-x-2 mb-4">
+          <Button
+            onClick={() => {
+              setCurrentProduct({});
+              setFormMode("create");
+              setDialogOpen(true);
+            }}
+          >
+            + Add Product
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setImportDialogOpen(true)}
+            className="flex items-center"
+          >
+            <FileSpreadsheet className="mr-2 h-4 w-4" />
+            Import Excel
+          </Button>
+        </div>
         <div className="w-full">
           <div className="flex items-center py-4">
             <Input
@@ -670,53 +890,77 @@ const ManageProducts: React.FC = () => {
               onChange={(event) => setGlobalFilter(event.target.value)}
               className="max-w-sm"
             />
-            {table.getFilteredSelectedRowModel().rows.length > 0 && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="ml-4">
-                    Bulk Actions <ChevronDown className="ml-2 h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuSub>
-                    <DropdownMenuSubTrigger>Set Status</DropdownMenuSubTrigger>
-                    <DropdownMenuPortal>
-                      <DropdownMenuSubContent>
-                        <DropdownMenuItem onClick={() => {
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="ml-4">
+                  Bulk Actions <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuSub>
+                  <DropdownMenuSubTrigger disabled={table.getFilteredSelectedRowModel().rows.length === 0}>
+                    Set Status
+                  </DropdownMenuSubTrigger>
+                  <DropdownMenuPortal>
+                    <DropdownMenuSubContent>
+                      <DropdownMenuItem
+                        onClick={() => {
                           setBulkStatus("ACTIVE");
                           setBulkStatusDialogOpen(true);
-                        }}>
-                          Active
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => {
+                        }}
+                        disabled={table.getFilteredSelectedRowModel().rows.length === 0}
+                      >
+                        Active
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => {
                           setBulkStatus("INACTIVE");
                           setBulkStatusDialogOpen(true);
-                        }}>
-                          Inactive
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => {
+                        }}
+                        disabled={table.getFilteredSelectedRowModel().rows.length === 0}
+                      >
+                        Inactive
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => {
                           setBulkStatus("DISCONTINUED");
                           setBulkStatusDialogOpen(true);
-                        }}>
-                          Discontinued
-                        </DropdownMenuItem>
-                      </DropdownMenuSubContent>
-                    </DropdownMenuPortal>
-                  </DropdownMenuSub>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleExportProducts}>
-                    Export as Excel
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    className="text-red-600 focus:text-red-600"
-                    onClick={() => setBulkDeleteDialogOpen(true)}
-                  >
-                    Delete Selected ({table.getFilteredSelectedRowModel().rows.length})
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
+                        }}
+                        disabled={table.getFilteredSelectedRowModel().rows.length === 0}
+                      >
+                        Discontinued
+                      </DropdownMenuItem>
+                    </DropdownMenuSubContent>
+                  </DropdownMenuPortal>
+                </DropdownMenuSub>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={handleExportProducts}
+                  disabled={table.getFilteredSelectedRowModel().rows.length === 0}
+                >
+                  Export selected
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={handleExportAllProducts}
+                >
+                  Export all
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-red-600 focus:text-red-600"
+                  onClick={() => setBulkDeleteDialogOpen(true)}
+                  disabled={table.getFilteredSelectedRowModel().rows.length === 0}
+                >
+                  Delete Selected ({table.getFilteredSelectedRowModel().rows.length})
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="text-red-600 focus:text-red-600"
+                  onClick={handleDeleteAll}
+                >
+                  Delete All ({table.getFilteredRowModel().rows.length})
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="ml-auto">
@@ -1060,6 +1304,29 @@ const ManageProducts: React.FC = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Add Excel Import Dialog */}
+      <ExcelImportDialog
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        onImport={handleImportProducts}
+        title="Import Products"
+        description="Import products from an Excel file. The first row should be the header row with column names matching the product fields."
+        requiredFields={["name", "brand", "description", "price", "imageURL", "stock", "status", "category"]}
+        ignoredFields={["id", "createdAt", "updatedAt"]}
+        fieldValidators={{
+          price: (value) => !isNaN(Number(value)),
+          stock: (value) => !isNaN(Number(value)),
+          status: (value) => ["ACTIVE", "INACTIVE", "DISCONTINUED"].includes(value)
+        }}
+        validateRow={(row) => {
+          // Additional validation for the row
+          if (!["ACTIVE", "INACTIVE", "DISCONTINUED"].includes(row.status)) {
+            return { valid: false, reason: "Invalid status value. Must be ACTIVE, INACTIVE, or DISCONTINUED" };
+          }
+          return { valid: true };
+        }}
+      />
     </ProtectedRoute>
   );
 };
