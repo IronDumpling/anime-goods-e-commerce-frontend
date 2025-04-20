@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Product } from '@/lib/types';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
+import { useCart } from '@/context/CartContext';
 import { Link } from 'react-router-dom';
 import { ImageOff, ShoppingCart } from 'lucide-react';
 
@@ -11,6 +12,8 @@ interface ProductEntryProps {
 
 export function ProductEntry({ product }: ProductEntryProps) {
   const [imageError, setImageError] = useState(false);
+  const { addItem } = useCart();
+  const isInactive = product.status === 'INACTIVE';
 
   return (
     <div className="bg-card text-card-foreground rounded-xl border shadow-sm overflow-hidden hover:shadow-lg transition-shadow">
@@ -44,6 +47,10 @@ export function ProductEntry({ product }: ProductEntryProps) {
             <div className="text-base font-bold mt-1">
               ${product.price.toFixed(2)}
             </div>
+            <div className="flex gap-2">
+              <Badge>{product.category}</Badge>
+              {isInactive && <Badge className="bg-yellow-600">Inactive</Badge>}
+            </div>
           </div>
           <div className="flex gap-2 flex-shrink-0">
             <Button asChild variant="outline" size="sm">
@@ -52,17 +59,11 @@ export function ProductEntry({ product }: ProductEntryProps) {
             <Button
               size="sm"
               className="text-primary-foreground"
-              disabled={product.stock <= 0}
+              disabled={product.stock <= 0 || isInactive}
+              onClick={() => addItem(product)}
             >
               <ShoppingCart className="mr-2 h-4 w-4" />
               Add to Cart
-            </Button>
-            <Button
-              size="sm"
-              className="text-primary-foreground"
-              disabled={product.stock <= 0}
-            >
-              Buy Now
             </Button>
           </div>
         </div>

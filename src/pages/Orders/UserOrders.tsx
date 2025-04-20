@@ -1,20 +1,20 @@
 import { useState, useEffect } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft } from "lucide-react";
+import { Link, useParams } from 'react-router-dom';
 
 import { useAuth } from '@/context/AuthContext';
-import { Order } from '@/lib/mock';
+import { Order } from '@/lib/types';
+import { addOrderTotal } from '@/lib/utils';
 import { get } from "@/lib/api";
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import ProtectedRoute from "@/components/layout/ProtectedRoute";
+import BackButton from '@/components/layout/BackButton';
 import { Badge } from '@/components/ui/Badge';
 
 function UserOrders() {
   const { user } = useAuth();
   const { userId } = useParams();
-  const navigate = useNavigate();
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<(Order & { total: number })[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -29,7 +29,7 @@ function UserOrders() {
           throw response.error || { error: "Unknown Error UserOrders"};
         }
         data = response.data;
-        setOrders(data);
+        setOrders(data.map(addOrderTotal));
       } catch (err) {
         setError('Failed to load orders');
         console.error('Error fetching orders:', err);
@@ -62,12 +62,7 @@ function UserOrders() {
   if (orders.length === 0) {
     return (
       <div className="container mx-auto px-4 py-10">
-        <button
-          className="flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
-          onClick={() => navigate(`/user/${userId}`)}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" /> Back to User Page
-        </button>
+        <BackButton to={`/user/${userId}`} label="Back to User Page" />
         <h1 className="text-2xl font-bold mb-6">Your Orders</h1>
         <div className="text-center">
           <p className="mb-4">You haven't placed any orders yet.</p>
@@ -82,12 +77,7 @@ function UserOrders() {
   return (
     <ProtectedRoute accessLevel="self">
       <div className="container mx-auto px-4 py-10">
-        <button
-          className="flex items-center text-sm text-muted-foreground hover:text-foreground mb-4"
-          onClick={() => navigate(`/user/${userId}`)}
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" /> Back to User Page
-        </button>
+        <BackButton to={`/user/${userId}`} label="Back to User Page" />
         <h1 className="text-2xl font-bold mb-6">Your Orders</h1>
         <div className="space-y-6">
           {orders.map((order) => (
@@ -97,9 +87,9 @@ function UserOrders() {
                 <div className="flex items-center gap-2">
                   <Badge
                     className={
-                      order.status === 'delivered' ? 'bg-green-500' :
-                      order.status === 'processing' ? 'bg-blue-500' :
-                      order.status === 'cancelled' ? 'bg-red-500' :
+                      order.status === 'DELIVERED' ? 'bg-green-500' :
+                      order.status === 'PROCESSING' ? 'bg-blue-500' :
+                      order.status === 'CANCELLED' ? 'bg-red-500' :
                       'bg-yellow-500'
                     }
                   >
@@ -112,15 +102,15 @@ function UserOrders() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {order.products.map((item) => (
+                  {order.orderItems.map((item) => (
                     <div key={item.productId} className="flex justify-between">
                       <span>Product #{item.productId} x {item.quantity}</span>
-                      <span>${(item.price * item.quantity).toFixed(2)}</span>
+                      <span>${(item.unitPrice * item.quantity).toFixed(2)}</span>
                     </div>
                   ))}
                   <div className="border-t pt-2 mt-2 flex justify-between font-bold">
                     <span>Total</span>
-                    <span>${order.total.toFixed(2)}</span>
+                    <span>${order.total?.toFixed(2)}</span>
                   </div>
                 </div>
                 <div className="mt-4">

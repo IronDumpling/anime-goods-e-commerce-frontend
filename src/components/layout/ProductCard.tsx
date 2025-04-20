@@ -12,29 +12,34 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const [imageError, setImageError] = useState(false);
+
   const { addItem, isLoading } = useCart();
+  const isInactive = product.status === 'INACTIVE';
 
   return (
     <div className="bg-card text-card-foreground rounded-xl border shadow-sm overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col">
       <div className="aspect-square relative bg-muted">
-        {imageError ? (
-          <div className="w-full h-full flex items-center justify-center">
-            <ImageOff className="h-12 w-12 text-muted-foreground" />
-          </div>
-        ) : (
-          <img
-            src={product.imageURL}
-            alt={product.name}
-            className="object-cover w-full h-full"
-            onError={() => setImageError(true)}
-          />
-        )}
+        <div className="w-full h-80 relative bg-muted rounded-t-md overflow-hidden">
+          {imageError ? (
+            <div className="w-full h-full flex items-center justify-center">
+              <ImageOff className="h-12 w-12 text-muted-foreground" />
+            </div>
+          ) : (
+            <img
+              src={product.imageURL}
+              alt={product.name}
+              className="object-cover w-full h-full"
+              onError={() => setImageError(true)}
+            />
+          )}
+        </div>
         <Badge
           className="absolute top-2 right-2"
           variant={product.stock > 0 ? "default" : "destructive"}
         >
           {product.stock > 0 ? "In Stock" : "Out of Stock"}
         </Badge>
+        {isInactive && <Badge className="absolute top-2 left-2 bg-yellow-600">Inactive</Badge>}
       </div>
       <div className="p-3 flex-grow">
         <h3 className="text-lg font-semibold truncate">{product.name}</h3>
@@ -50,18 +55,12 @@ export function ProductCard({ product }: ProductCardProps) {
         <Button
           size="sm"
           className="text-primary-foreground"
-          disabled={product.stock <= 0 || isLoading}
+
+          disabled={product.stock <= 0 || isLoading || isInactive}
           onClick={() => addItem(product)}
         >
           <ShoppingCart className="mr-2 h-4 w-4" />
           {isLoading ? "Loading..." : "Add to Cart"}
-        </Button>
-        <Button
-          size="sm"
-          className="text-primary-foreground"
-          disabled={product.stock <= 0 || isLoading}
-        >
-          Buy Now
         </Button>
       </div>
     </div>

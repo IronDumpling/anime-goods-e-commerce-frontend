@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { Product } from '@/lib/types';
 import { get } from '@/lib/api';
+import { toast } from "sonner";
 
 export interface CartItem {
   product: Product;
@@ -89,6 +90,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [items, isLoading]);
 
   const addItem = (product: Product) => {
+    toast.success("Add product to cart!");
     setItems(prev => {
       const existingItem = prev.find(item => item.product.id === product.id);
       if (existingItem) {

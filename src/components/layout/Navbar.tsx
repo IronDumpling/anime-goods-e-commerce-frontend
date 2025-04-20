@@ -3,7 +3,7 @@ import { Button } from "../ui/Button";
 import { useTheme } from "../../context/ThemeContext";
 import { Input } from "@/components/ui/Input";
 import { useAuth } from "@/context/AuthContext";
-import { mockApi, ProductCategory } from "@/lib/mock";
+import { typesApi, ProductCategory } from "@/lib/types";
 import { useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useCart } from "@/context/CartContext";
@@ -73,28 +73,30 @@ function CartPreviewItem({ item }: CartPreviewItemProps) {
   const [imageError, setImageError] = useState(false);
 
   return (
-    <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-accent">
-      <div className="w-12 h-12 relative bg-muted rounded-md flex-shrink-0">
-        {imageError ? (
-          <div className="w-full h-full flex items-center justify-center">
-            <ImageOff className="h-6 w-6 text-muted-foreground" />
-          </div>
-        ) : (
-          <img
-            src={item.product.imageURL}
-            alt={item.product.name}
-            className="w-full h-full object-cover rounded-md"
-            onError={() => setImageError(true)}
-          />
-        )}
+    <Link to={`/products/${item.product.id}`}>
+      <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-accent">
+        <div className="w-12 h-12 relative bg-muted rounded-md flex-shrink-0">
+          {imageError ? (
+            <div className="w-full h-full flex items-center justify-center">
+              <ImageOff className="h-6 w-6 text-muted-foreground" />
+            </div>
+          ) : (
+            <img
+              src={item.product.imageURL}
+              alt={item.product.name}
+              className="w-full h-full object-cover rounded-md"
+              onError={() => setImageError(true)}
+            />
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium truncate">{item.product.name}</p>
+          <p className="text-xs text-muted-foreground">
+            ${item.product.price.toFixed(2)} × {item.quantity}
+          </p>
+        </div>
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate">{item.product.name}</p>
-        <p className="text-xs text-muted-foreground">
-          ${item.product.price.toFixed(2)} × {item.quantity}
-        </p>
-      </div>
-    </div>
+    </Link>
   );
 }
 
@@ -187,7 +189,7 @@ export default function Navbar() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const data = await mockApi.categories.getAll();
+        const data = await typesApi.categories.getAll();
         setCategories(data);
       } catch (error) {
         console.error('Error fetching categories:', error);

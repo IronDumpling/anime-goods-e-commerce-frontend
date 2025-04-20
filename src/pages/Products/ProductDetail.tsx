@@ -4,6 +4,7 @@ import { get } from "@/lib/api";
 import { Product } from '@/lib/types'
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
+import BackButton from '@/components/layout/BackButton';
 import { ImageOff, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
 
@@ -52,8 +53,11 @@ function ProductDetail() {
     );
   }
 
+  const isInactive = product.status === 'INACTIVE';
+
   return (
     <div className="container mx-auto px-4 py-10">
+      <BackButton to={`/products`} label="Back to Product List" />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="aspect-square relative bg-muted rounded-lg">
           {!imageError ? (
@@ -72,6 +76,7 @@ function ProductDetail() {
         <div>
           <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
           <Badge className="mb-4">{product.category}</Badge>
+          {isInactive && <Badge className="mb-2 bg-yellow-600">Inactive</Badge>}
           <p className="text-2xl font-bold text-primary mb-4">${product.price.toFixed(2)}</p>
           <p className="text-muted-foreground mb-6">{product.description}</p>
           <div className="mb-4">
@@ -83,20 +88,11 @@ function ProductDetail() {
           <div className="flex gap-4">
             <Button
               className="flex-1"
-              disabled={product.stock === 0}
-              onClick={() => {
-                console.log("Add to Cart!");
-                addItem(product);
-              }}
+              disabled={product.stock === 0 || isInactive}
+              onClick={() => addItem(product)}
             >
               <ShoppingCart className="mr-2 h-5 w-5" />
               Add to Cart
-            </Button>
-            <Button
-              className="flex-1"
-              disabled={product.stock === 0}
-            >
-              Buy Now
             </Button>
           </div>
         </div>

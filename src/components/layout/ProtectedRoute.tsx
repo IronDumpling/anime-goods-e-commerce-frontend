@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useLocation, useParams } from 'react-router-dom';
 import HttpError from './HttpError';
@@ -9,19 +9,51 @@ interface ProtectedRouteProps {
   children?: React.ReactNode;
   accessLevel: AccessLevel;
   fallbackPath?: string;
+  resolveUserId?: (requestId: string) => Promise<string | undefined>;
+  paramKey?: string;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   accessLevel,
-  fallbackPath
+  fallbackPath,
+  resolveUserId,
+  paramKey = 'userId',
 }) => {
   const { user } = useAuth();
   const isLoggedIn = user !== null;
   const isAdmin = user?.isAdmin;
   const location = useLocation();
   const currentPath = location.pathname;
-  const { userId } = useParams();
+  const params = useParams();
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [resolvedUserId, setResolvedUserId] = useState<string | undefined>();
+
+  const reqId = params[paramKey];
+
+  useEffect(() => {
+    let fetchUserId = async () => {
+      if (reqId) {
+        let resId: string | undefined;
+        if (resolveUserId) {
+          resId = await resolveUserId(reqId);
+        } else {
+          resId = reqId;
+        }
+        setResolvedUserId(resId);
+        setIsLoading(false);
+      } else {
+        setResolvedUserId(undefined);
+        setIsLoading(false);
+      }
+    };
+    setIsLoading(true);
+    fetchUserId();
+  }, [resolveUserId, reqId]);
+
+  if (isLoading) {
+    return <></>;
+  }
 
   // If not logged in, show 401 error
   if (!isLoggedIn) {
@@ -35,14 +67,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // If the access is the user itself
   if (accessLevel === 'self') {
-    if (!userId || String(user?.id) !== userId) {
+    if (!resolvedUserId || String(user?.id) !== resolvedUserId) {
       return <HttpError code={403} />;
     }
   }
 
   // If the access is only the user itself and admin
   if (accessLevel === 'self-and-admin') {
-    if (!isAdmin && (!userId || String(user?.id) !== userId)) {
+    if (!isAdmin && (!resolvedUserId || String(user?.id) !== resolvedUserId)) {
+      console.log(`isAdmin: ${isAdmin}, userId: ${resolvedUserId}, user.id ${user.id}`);
       return <HttpError code={403} />;
     }
   }

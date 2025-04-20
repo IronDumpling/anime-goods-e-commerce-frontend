@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Product } from '@/lib/types';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
@@ -64,7 +65,9 @@ export function CartListEntry({
               >
                 {product.stock > 0 ? "In Stock" : "Out of Stock"}
               </Badge>
-              <h3 className="text-base font-semibold truncate">{product.name}</h3>
+              <Link to={`/products/${product.id}`}>
+                <h3 className="text-base font-semibold truncate">{product.name}</h3>
+              </Link>
             </div>
             <p className="text-sm text-muted-foreground line-clamp-1 mt-0.5">{product.description}</p>
             <div className="text-base font-bold mt-1">
