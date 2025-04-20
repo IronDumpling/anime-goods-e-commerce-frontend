@@ -35,6 +35,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { exportTableToCSV } from "@/lib/csvUtils";
 
 interface OrderItem {
   orderItemId: number;
@@ -196,6 +197,27 @@ const ManageOrders: React.FC = () => {
               onChange={(event) => setGlobalFilter(event.target.value)}
               className="max-w-sm"
             />
+            {table.getFilteredSelectedRowModel().rows.length > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="ml-4">
+                    Bulk Actions <ChevronDown className="ml-2 h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent>
+                  <DropdownMenuItem onClick={() => exportTableToCSV(table, "orders-export")}>
+                    Export Selected
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+            <Button
+              variant="outline"
+              className="ml-4"
+              onClick={() => exportTableToCSV(table, "orders-export", false)}
+            >
+              Export All
+            </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="ml-auto">

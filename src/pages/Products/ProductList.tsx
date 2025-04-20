@@ -4,7 +4,7 @@ import { ProductCard } from '@/components/layout/ProductCard';
 import { ProductEntry } from '@/components/layout/ProductEntry';
 import { typesApi, ProductCategory } from '@/lib/types';
 import { Product } from '@/lib/types'
-import { get } from "@/lib/api"; 
+import { get } from "@/lib/api";
 import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Slider } from '@/components/ui/slider';
@@ -155,7 +155,8 @@ function ProductList() {
           return b.name.localeCompare(a.name);
         case 'newest':
         default:
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          // Sort by ID (assuming newer products have higher IDs due to auto-increment)
+          return b.id - a.id;
       }
     });
 
@@ -334,11 +335,11 @@ function ProductList() {
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="newest">Newest</SelectItem>
                   <SelectItem value="price-asc">Price: Low to High</SelectItem>
                   <SelectItem value="price-desc">Price: High to Low</SelectItem>
                   <SelectItem value="name-asc">Name: A to Z</SelectItem>
                   <SelectItem value="name-desc">Name: Z to A</SelectItem>
+                  <SelectItem value="newest">Newest</SelectItem>
                 </SelectContent>
               </Select>
             </div>
