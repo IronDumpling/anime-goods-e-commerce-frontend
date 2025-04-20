@@ -33,6 +33,8 @@ interface ExcelImportDialogProps<T> {
   validateRow?: (row: any) => { valid: boolean; reason?: string };
   fieldValidators?: Record<string, (value: any) => boolean>;
   additionalFields?: string[];
+  existingData?: T[];
+  isDuplicate?: (a: T, b: T) => boolean;
 }
 
 function ExcelImportDialog<T>({
@@ -46,6 +48,8 @@ function ExcelImportDialog<T>({
   validateRow,
   fieldValidators = {},
   additionalFields = [],
+  existingData = [],
+  isDuplicate,
 }: ExcelImportDialogProps<T>) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [importResults, setImportResults] = useState<ImportResult<T> | null>(null);
@@ -134,6 +138,7 @@ function ExcelImportDialog<T>({
       // Process each row
       const processedData: T[] = [];
       const failedRows: { row: number; data: any; reason: string }[] = [];
+      const localSeen: T[] = [];
 
       for (let i = 0; i < data.length; i++) {
         const rowData = data[i];
@@ -159,7 +164,19 @@ function ExcelImportDialog<T>({
           }
         }
 
+        const isDupExisting = existingData.some(item => isDuplicate?.(item, filteredData));
+        const isDupLocal = localSeen.some(item => isDuplicate?.(item, filteredData));
+        if (isDupExisting || isDupLocal) {
+          failedRows.push({
+            row: i + 2,
+            data: filteredData,
+            reason: 'Duplicate entry (already exists or repeated in file)'
+          });
+          continue;
+        }
+
         processedData.push(filteredData as T);
+        localSeen.push(filteredData as T);
       }
 
       if (processedData.length === 0) {
@@ -198,7 +215,7 @@ function ExcelImportDialog<T>({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-3xl">
+      <DialogContent className="w-full max-w-[90vw] sm:max-w-6xl">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>

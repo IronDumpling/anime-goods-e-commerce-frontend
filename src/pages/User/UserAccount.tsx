@@ -5,22 +5,28 @@ import BackButton from '@/components/layout/BackButton';
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Card } from "@/components/ui/Card";
+import { useAuth } from "@/context/AuthContext";
 import { cn } from "@/lib/utils";
 import { User } from "@/lib/types";
-import { useAuth } from "@/context/AuthContext";
+import { put } from "@/lib/api";
 
-import { useParams, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { useParams } from "react-router-dom";
 
 type EditType = "firstName" | "lastName" | "email" | "password" | "address" | null;
 
 function UserAccount() {
   const { userId } = useParams();
   const { user, updateUser } = useAuth();
-  const navigate = useNavigate();
   const [editField, setEditField] = useState<EditType>(null);
   const [visibleField, setVisibleField] = useState<EditType>(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const newPasswordRef = useRef<HTMLInputElement>(null);
+  const rePasswordRef = useRef<HTMLInputElement>(null);
+  
+  const backPath = user?.isAdmin ? "/admin" : `/user/${userId}`;
+  const backText = user?.isAdmin ? "Back to Admin Page" : "Back to User Page";
 
   useEffect(() => {
     if (editField) {
@@ -33,11 +39,38 @@ function UserAccount() {
     setEditField(null);
   };
 
-  const handleSave = () => {
-    if (!inputRef.current || !visibleField) return;
-    const newValue = inputRef.current.value.trim();
-    const newUser = {...user, [visibleField]: newValue} as User
-    updateUser(newUser);
+  const handleSave = async () => {
+    if (!visibleField || !user) return;
+
+    const updatedUser: Partial<User> = { ...user };
+    let updatedPayload: any = { ...user };
+  
+    if (visibleField === "password") {
+      const newPassword = newPasswordRef.current?.value.trim();
+      const rePassword = rePasswordRef.current?.value.trim();
+      if (!newPassword || newPassword !== rePassword) {
+        toast.error("Passwords must match and not be empty.");
+        return;
+      }
+      updatedPayload.password = newPassword;
+    } else {
+      if (!inputRef.current) return;
+      const fieldValue = inputRef.current.value.trim();
+      updatedUser[visibleField] = fieldValue;
+      updatedPayload[visibleField] = fieldValue;
+    }
+  
+    try {
+      const response = await put<User>(`/api/user/${user.id}`, updatedPayload);
+      if (response && response.data) {
+        updateUser(response.data);
+      } else {
+        toast.error("Failed to update user");
+      }
+    } catch (err) {
+      console.error("Update error:", err);
+      toast.error("Update error:" + err)
+    }
     closeEdit();
   };
 
@@ -74,9 +107,8 @@ function UserAccount() {
 
         {visibleField === "password" ? (
           <>
-            <Input type="password" placeholder="Current password" className="mb-2 text-left" />
-            <Input type="password" placeholder="New password" className="mb-2 text-left" />
-            <Input type="password" placeholder="Reenter new password" className="mb-4 text-left" />
+            <Input type="password" placeholder="New password" className="mb-2 text-left" ref={newPasswordRef} />
+            <Input type="password" placeholder="Confirm new password" className="mb-4 text-left" ref={rePasswordRef} />
             <div className="flex justify-end gap-2">
               <Button variant="outline" onClick={closeEdit}>Cancel</Button>
               <Button onClick={handleSave}>Save</Button>
@@ -103,7 +135,7 @@ function UserAccount() {
   return (
     <ProtectedRoute accessLevel="self">
       <div className="container mx-auto px-4 py-10">
-        <BackButton to={`/user/${userId}`} label="Back to User Page" />
+        <BackButton to={backPath} label={backText} />
         <div
           className={cn(
             "flex flex-col md:flex-row gap-6 transition-all duration-300",

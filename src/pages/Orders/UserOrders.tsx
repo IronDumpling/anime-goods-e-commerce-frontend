@@ -87,9 +87,9 @@ function UserOrders() {
                 <div className="flex items-center gap-2">
                   <Badge
                     className={
-                      order.status === 'delivered' ? 'bg-green-500' :
-                      order.status === 'processing' ? 'bg-blue-500' :
-                      order.status === 'cancelled' ? 'bg-red-500' :
+                      order.status === 'DELIVERED' ? 'bg-green-500' :
+                      order.status === 'PROCESSING' ? 'bg-blue-500' :
+                      order.status === 'CANCELLED' ? 'bg-red-500' :
                       'bg-yellow-500'
                     }
                   >
