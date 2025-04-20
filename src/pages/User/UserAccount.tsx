@@ -9,18 +9,20 @@ import { cn } from "@/lib/utils";
 import { User } from "@/lib/types";
 import { useAuth } from "@/context/AuthContext";
 
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 type EditType = "firstName" | "lastName" | "email" | "password" | "address" | null;
 
 function UserAccount() {
   const { userId } = useParams();
   const { user, updateUser } = useAuth();
-  const navigate = useNavigate();
   const [editField, setEditField] = useState<EditType>(null);
   const [visibleField, setVisibleField] = useState<EditType>(null);
 
   const inputRef = useRef<HTMLInputElement>(null);
+  
+  const backPath = user?.isAdmin ? "/admin" : `/user/${userId}`;
+  const backText = user?.isAdmin ? "Back to Admin Page" : "Back to User Page";
 
   useEffect(() => {
     if (editField) {
@@ -103,7 +105,7 @@ function UserAccount() {
   return (
     <ProtectedRoute accessLevel="self">
       <div className="container mx-auto px-4 py-10">
-        <BackButton to={`/user/${userId}`} label="Back to User Page" />
+        <BackButton to={backPath} label={backText} />
         <div
           className={cn(
             "flex flex-col md:flex-row gap-6 transition-all duration-300",

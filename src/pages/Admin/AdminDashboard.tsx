@@ -1,8 +1,11 @@
 import React from 'react';
 import ProtectedRoute from '@/components/layout/ProtectedRoute';
 import UserDashboardCard from "@/components/layout/UserDashboardCard";
+import { useAuth } from "@/context/AuthContext";
 
 const AdminDashboard: React.FC = () => {
+  const { user } = useAuth();
+
   return (
     <ProtectedRoute accessLevel="admin">
       <div className="container mx-auto px-4 py-10">
@@ -23,6 +26,11 @@ const AdminDashboard: React.FC = () => {
               title="Manage Products"
               description="Track, update, create, or delete products"
               to="/admin/products"
+            />
+            <UserDashboardCard
+              title="My Account"
+              description="View or update your personal admin account"
+              to={`/user/${user?.id}/account`}
             />
           </div>
         </div>
