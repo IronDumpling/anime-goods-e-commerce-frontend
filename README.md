@@ -40,12 +40,12 @@ For full documentation, visit our [backend repository](https://github.com/Little
 ```
 📁 src/
 ├── components/          # Reusable UI components
-├── context/             # Auth context
+├── context/             # Context for Theme, Cart and Auth
 ├── pages/               # Page-level components
-│   ├── User/            # /user/:id routes
-│   ├── Admin/           # /admin routes
-│   ├── Product/         # /products
-│   └── Order/           # /orders
+│   ├── User/            # user routes
+│   ├── Admin/           # admin management routes
+│   ├── Product/         # product routes
+│   └── Order/           # order routes
 ├── lib/                 # Utility functions, API handlers
 ├── assets/              # Images & icons
 └── App.tsx              # Main router
@@ -63,21 +63,24 @@ For full documentation, visit our [backend repository](https://github.com/Little
 
 ## 🔁 API Interaction
 
-Uses a centralized `api.ts` wrapper for all HTTP calls. Example:
+Uses a centralized `api.ts` type-annotated wrapper for all HTTP calls. Example:
 
 ```ts
-const response = await get<Product[]>("/api/products");
+const response = await get<{ products: Product[] }>("/api/product");
 ```
 
 When placing an order:
 
 ```ts
-POST /api/order
+await post<Order>("/api/order", 
 {
   userId: 1,
   status: "PENDING",
-  items: [{ productId: 3, quantity: 2 }]
-}
+  items: [
+    { productId: 3, quantity: 2 },
+    { productId: 5, quantity: 1 }
+  ]
+});
 ```
 
 ---
