@@ -1,4 +1,4 @@
-# 🛍️ Full-Stack E-Commerce Frontend (React + TypeScript)
+# 🛍️ AnimeGoods E-Commerce Frontend (React + TypeScript)
 
 This project is the **frontend** of a full-stack e-commerce platform built with **React**, **TypeScript**, and **TailwindCSS**, offering robust user and admin functionality including shopping, checkout, user profiles, order management, and admin dashboards.
 
