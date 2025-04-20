@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 
-import { get } from "@/lib/api"; 
+import { get } from "@/lib/api";
 import { addOrderTotal } from '@/lib/utils';
 import { Product, Order } from '@/lib/types';
 
@@ -90,8 +90,20 @@ function OrderDetail() {
     );
   }
 
+  const getUserIdFromOrderId = async function (orderId: string) {
+    try {
+      const response = await get<Order>(`/api/order/${orderId}`);
+      return String(response.data?.userId) || undefined;
+    } catch (error) {
+      return undefined;
+    }
+  };
   return (
-    <ProtectedRoute accessLevel="self-and-admin">
+    <ProtectedRoute
+      accessLevel="self-and-admin"
+      resolveUserId={getUserIdFromOrderId}
+      paramKey='orderId'
+    >
       <div className="container mx-auto px-4 py-10">
         <BackButton to={`/orders`} label="Back to Orders" />
         <h1 className="text-2xl font-bold mb-6">Order #{order.id}</h1>

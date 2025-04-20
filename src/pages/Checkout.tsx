@@ -6,7 +6,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import ProtectedRoute from '@/components/layout/ProtectedRoute';
 import { useCart } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
-import { post } from "@/lib/api"; 
+import { post } from "@/lib/api";
 import { useNavigate } from 'react-router-dom';
 
 const Checkout: React.FC = () => {
