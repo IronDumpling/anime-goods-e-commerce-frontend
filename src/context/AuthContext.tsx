@@ -33,7 +33,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(user);
       localStorage.setItem('user', JSON.stringify(user));
     }
-
   }
 
   const setTokenPersistent = (token: string | null) => {
@@ -44,8 +43,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(token);
       localStorage.setItem('token', token);
     }
-
-
   }
 
   const login = async (email: string, password: string) => {
