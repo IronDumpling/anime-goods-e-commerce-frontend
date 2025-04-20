@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+
+import { get } from "@/lib/api";
+import { addOrderTotal } from '@/lib/utils';
+import { Product, Order } from '@/lib/types';
+
 import { useAuth } from '@/context/AuthContext';
-import { mockApi, Order } from '@/lib/mock';
-import { get } from "@/lib/api"; 
-import { Product } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import ProtectedRoute from "@/components/layout/ProtectedRoute";
 import BackButton from '@/components/layout/BackButton';
@@ -11,9 +13,8 @@ import { Badge } from '@/components/ui/Badge';
 
 function OrderDetail() {
   const { orderId } = useParams();
-  // TODO: get userId from orderId
   const { user } = useAuth();
-  const [order, setOrder] = useState<Order | null>(null);
+  const [order, setOrder] = useState<(Order & { total: number }) | null>(null);
   const [products, setProducts] = useState<Record<number, Product>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,31 +24,35 @@ function OrderDetail() {
       if (!orderId || !user) return;
 
       try {
-        const orderData = await mockApi.orders.getById(parseInt(orderId));
+        console.log("User ID:", user.id, "Is Admin:", user.isAdmin);
+        const response = await get<Order>("/api/order/" + parseInt(orderId));
+        console.log("Order API Response:", response);
 
-        if (!orderData) {
-          setError('Order not found');
-          return;
+        if (response.error || !response.data) {
+          throw response.error || { error: "Unknown Error Order Detail"};
         }
 
         // Verify that the order belongs to the current user
-        if (orderData.userId !== user.id) {
-          setError('You do not have permission to view this order');
+        const orderData = response.data;
+        console.log("Order User ID:", orderData.userId);
+
+        if (!user.isAdmin && orderData.userId !== user.id) {
+          setError("You do not have permission to view this order");
           return;
         }
 
-        setOrder(orderData);
+        setOrder(addOrderTotal(orderData));
 
         // Fetch product details for each item in the order
-        const productPromises = orderData.products.map(item =>
+        const productPromises = orderData.orderItems.map(item =>
           get<Product>("/api/product/" + Number(item.productId))
         );
         const productResults = await Promise.all(productPromises);
 
         const productMap: Record<number, Product> = {};
-        productResults.forEach(product => {
-          if (product) {
-            productMap[product.id] = product;
+        productResults.forEach(result => {
+          if (result && result.data) {
+            productMap[result.data.id] = result.data;
           }
         });
         setProducts(productMap);
@@ -85,15 +90,22 @@ function OrderDetail() {
     );
   }
 
+  const getUserIdFromOrderId = async function (orderId: string) {
+    try {
+      const response = await get<Order>(`/api/order/${orderId}`);
+      return String(response.data?.userId) || undefined;
+    } catch (error) {
+      return undefined;
+    }
+  };
   return (
-    <ProtectedRoute accessLevel="self-and-admin">
+    <ProtectedRoute
+      accessLevel="self-and-admin"
+      resolveUserId={getUserIdFromOrderId}
+      paramKey='orderId'
+    >
       <div className="container mx-auto px-4 py-10">
-        <div className="mb-6">
-          <Link to="/orders" className="text-primary hover:underline">
-            ← Back to Orders
-          </Link>
-        </div>
-
+        <BackButton to={`/orders`} label="Back to Orders" />
         <h1 className="text-2xl font-bold mb-6">Order #{order.id}</h1>
 
         <div className="grid gap-6">
@@ -126,7 +138,7 @@ function OrderDetail() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {order.products.map((item) => {
+                {order.orderItems.map((item) => {
                   const product = products[item.productId];
                   return (
                     <div key={item.productId} className="flex items-center gap-4">
@@ -145,12 +157,12 @@ function OrderDetail() {
                           Quantity: {item.quantity}
                         </p>
                         <p className="text-sm">
-                          Price: ${item.price.toFixed(2)} each
+                          Price: ${item.unitPrice.toFixed(2)} each
                         </p>
                       </div>
                       <div className="text-right">
                         <p className="font-medium">
-                          ${(item.price * item.quantity).toFixed(2)}
+                          ${(item.unitPrice * item.quantity).toFixed(2)}
                         </p>
                       </div>
                     </div>
@@ -168,7 +180,7 @@ function OrderDetail() {
               <div className="space-y-2">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span>${order.total.toFixed(2)}</span>
+                  <span>${order.total?.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span>Shipping</span>
@@ -176,7 +188,7 @@ function OrderDetail() {
                 </div>
                 <div className="border-t pt-2 mt-2 flex justify-between font-bold">
                   <span>Total</span>
-                  <span>${order.total.toFixed(2)}</span>
+                  <span>${order.total?.toFixed(2)}</span>
                 </div>
               </div>
             </CardContent>

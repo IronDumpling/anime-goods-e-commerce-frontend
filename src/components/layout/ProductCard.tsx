@@ -17,18 +17,20 @@ export function ProductCard({ product }: ProductCardProps) {
   return (
     <div className="bg-card text-card-foreground rounded-xl border shadow-sm overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col">
       <div className="aspect-square relative bg-muted">
-        {imageError ? (
-          <div className="w-full h-full flex items-center justify-center">
-            <ImageOff className="h-12 w-12 text-muted-foreground" />
-          </div>
-        ) : (
-          <img
-            src={product.imageURL}
-            alt={product.name}
-            className="object-cover w-full h-full"
-            onError={() => setImageError(true)}
-          />
-        )}
+        <div className="w-full h-80 relative bg-muted rounded-t-md overflow-hidden">
+          {imageError ? (
+            <div className="w-full h-full flex items-center justify-center">
+              <ImageOff className="h-12 w-12 text-muted-foreground" />
+            </div>
+          ) : (
+            <img
+              src={product.imageURL}
+              alt={product.name}
+              className="object-cover w-full h-full"
+              onError={() => setImageError(true)}
+            />
+          )}
+        </div>
         <Badge
           className="absolute top-2 right-2"
           variant={product.stock > 0 ? "default" : "destructive"}

@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
 import { useAuth } from '@/context/AuthContext';
-import { Order } from '@/lib/mock';
+import { Order } from '@/lib/types';
+import { addOrderTotal } from '@/lib/utils';
 import { get } from "@/lib/api";
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
@@ -13,7 +14,7 @@ import { Badge } from '@/components/ui/Badge';
 function UserOrders() {
   const { user } = useAuth();
   const { userId } = useParams();
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [orders, setOrders] = useState<(Order & { total: number })[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -28,7 +29,7 @@ function UserOrders() {
           throw response.error || { error: "Unknown Error UserOrders"};
         }
         data = response.data;
-        setOrders(data);
+        setOrders(data.map(addOrderTotal));
       } catch (err) {
         setError('Failed to load orders');
         console.error('Error fetching orders:', err);
@@ -101,15 +102,15 @@ function UserOrders() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {order.products.map((item) => (
+                  {order.orderItems.map((item) => (
                     <div key={item.productId} className="flex justify-between">
                       <span>Product #{item.productId} x {item.quantity}</span>
-                      <span>${(item.price * item.quantity).toFixed(2)}</span>
+                      <span>${(item.unitPrice * item.quantity).toFixed(2)}</span>
                     </div>
                   ))}
                   <div className="border-t pt-2 mt-2 flex justify-between font-bold">
                     <span>Total</span>
-                    <span>${order.total.toFixed(2)}</span>
+                    <span>${order.total?.toFixed(2)}</span>
                   </div>
                 </div>
                 <div className="mt-4">

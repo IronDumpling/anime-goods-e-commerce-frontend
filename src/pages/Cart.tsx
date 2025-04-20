@@ -2,8 +2,10 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { CartListEntry } from '@/components/layout/CartListEntry';
-import { Trash2 } from 'lucide-react';
 import { useCart } from '@/context/CartContext';
+
+import { Trash2 } from 'lucide-react';
+import { useNavigate } from "react-router-dom";
 
 function Cart() {
   const {
@@ -14,6 +16,7 @@ function Cart() {
     selectAll,
     removeSelected,
   } = useCart();
+  const navigate = useNavigate();
 
   console.log(cartItems);
   // Filter selected items and calculate totals
@@ -106,6 +109,7 @@ function Cart() {
             <Button
               className="w-full"
               disabled={cartItems.length === 0 || (selectedItems.length > 0 && selectedTotalItems === 0)}
+              onClick={() => navigate(`/checkout`)}
             >
               Checkout {selectedItems.length > 0 ? `(${selectedTotalItems} items)` : ''}
             </Button>

@@ -3,7 +3,7 @@ import { Button } from "../ui/Button";
 import { useTheme } from "../../context/ThemeContext";
 import { Input } from "@/components/ui/Input";
 import { useAuth } from "@/context/AuthContext";
-import { mockApi, ProductCategory } from "@/lib/mock";
+import { typesApi, ProductCategory } from "@/lib/types";
 import { useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useCart } from "@/context/CartContext";
@@ -187,7 +187,7 @@ export default function Navbar() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const data = await mockApi.categories.getAll();
+        const data = await typesApi.categories.getAll();
         setCategories(data);
       } catch (error) {
         console.error('Error fetching categories:', error);
