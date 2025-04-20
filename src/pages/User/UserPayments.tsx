@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
+
 import ProtectedRoute from '@/components/layout/ProtectedRoute';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import BackButton from '@/components/layout/BackButton';
 
 interface PaymentMethod {
   id: string;
@@ -14,6 +17,8 @@ interface PaymentMethod {
 }
 
 const UserPayments: React.FC = () => {
+  const { userId } = useParams();
+
   const [methods, setMethods] = useState<PaymentMethod[]>([
     { id: '1', type: 'credit_card', label: 'Visa', lastFour: '4242', isDefault: true },
     { id: '2', type: 'paypal', label: 'PayPal', lastFour: 'N/A', isDefault: false },
@@ -32,6 +37,7 @@ const UserPayments: React.FC = () => {
   return (
     <ProtectedRoute accessLevel="self">
       <div className="container mx-auto px-4 py-10">
+        <BackButton to={`/user/${userId}`} label="Back to User Page" />
         <h1 className="text-3xl font-bold mb-6">Manage Payment Methods</h1>
 
         <RadioGroup value={selectedId} onValueChange={setSelectedId} className="space-y-4">

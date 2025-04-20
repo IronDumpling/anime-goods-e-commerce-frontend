@@ -3,7 +3,7 @@ import { Button } from "../ui/Button";
 import { useTheme } from "../../context/ThemeContext";
 import { Input } from "@/components/ui/Input";
 import { useAuth } from "@/context/AuthContext";
-import { mockApi, ProductCategory } from "@/lib/mock";
+import { typesApi, ProductCategory } from "@/lib/types";
 import { useSearchParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useCart } from "@/context/CartContext";
@@ -61,8 +61,8 @@ interface CartPreviewItemProps {
   item: {
     product: {
       id: number;
-      title: string;
-      image: string;
+      name: string;
+      imageURL: string;
       price: number;
     };
     quantity: number;
@@ -73,28 +73,30 @@ function CartPreviewItem({ item }: CartPreviewItemProps) {
   const [imageError, setImageError] = useState(false);
 
   return (
-    <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-accent">
-      <div className="w-12 h-12 relative bg-muted rounded-md flex-shrink-0">
-        {imageError ? (
-          <div className="w-full h-full flex items-center justify-center">
-            <ImageOff className="h-6 w-6 text-muted-foreground" />
-          </div>
-        ) : (
-          <img
-            src={item.product.image}
-            alt={item.product.title}
-            className="w-full h-full object-cover rounded-md"
-            onError={() => setImageError(true)}
-          />
-        )}
+    <Link to={`/products/${item.product.id}`}>
+      <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-accent">
+        <div className="w-12 h-12 relative bg-muted rounded-md flex-shrink-0">
+          {imageError ? (
+            <div className="w-full h-full flex items-center justify-center">
+              <ImageOff className="h-6 w-6 text-muted-foreground" />
+            </div>
+          ) : (
+            <img
+              src={item.product.imageURL}
+              alt={item.product.name}
+              className="w-full h-full object-cover rounded-md"
+              onError={() => setImageError(true)}
+            />
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium truncate">{item.product.name}</p>
+          <p className="text-xs text-muted-foreground">
+            ${item.product.price.toFixed(2)} × {item.quantity}
+          </p>
+        </div>
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium truncate">{item.product.title}</p>
-        <p className="text-xs text-muted-foreground">
-          ${item.product.price.toFixed(2)} × {item.quantity}
-        </p>
-      </div>
-    </div>
+    </Link>
   );
 }
 
@@ -143,9 +145,11 @@ function CartPreview() {
 
 export default function Navbar() {
   const { toggleTheme } = useTheme();
-  const { isLoggedIn, username, isAdmin, logout } = useAuth();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const isLoggedIn = user !== null;
+  const isAdmin = user?.isAdmin;
   const userId = user?.id;
+  const firstName = user?.firstName;
   const navigate = useNavigate();
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -183,7 +187,7 @@ export default function Navbar() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const data = await mockApi.categories.getAll();
+        const data = await typesApi.categories.getAll();
         setCategories(data);
       } catch (error) {
         console.error('Error fetching categories:', error);
@@ -198,14 +202,17 @@ export default function Navbar() {
   };
 
   const handleLogout = () => {
-    // Navigate to home page with a state indicating we're logging out
-    navigate('/', { state: { isLoggingOut: true } });
-    // Use setTimeout to ensure navigation completes before logout
-    setTimeout(() => {
+    // Only navigate if we're not already on the products page
+    if (location.pathname !== '/products') {
+      navigate('/products');
+      // Use setTimeout to ensure navigation completes before logout
+      setTimeout(() => {
+        logout();
+      }, 100);
+    } else {
+      // If already on products page, just logout directly
       logout();
-    }, 100);
-    // !(yushun): make sure the homepage displays exactly the same content
-    // no matter whether the user is logged in or not
+    }
   };
 
   const renderUserMenu = () => {
@@ -227,7 +234,7 @@ export default function Navbar() {
       return (
         <div className="w-[200px] p-4">
           <div className="mb-4">
-            <p className="text-sm font-medium">Welcome, Admin {username}!</p>
+            <p className="text-sm font-medium">Welcome, Admin {firstName}!</p>
           </div>
           <div className="grid gap-3">
             <Link
@@ -268,7 +275,7 @@ export default function Navbar() {
     return (
       <div className="w-[200px] p-4">
         <div className="mb-4">
-          <p className="text-sm font-medium">Welcome, {username}!</p>
+          <p className="text-sm font-medium">Welcome, {firstName}!</p>
         </div>
         <div className="grid gap-3">
           <Link

@@ -1,10 +1,14 @@
+export interface ApiError {
+  error: string;
+  details?: Array<string>;
+}
+
 interface ApiResponse<T> {
   data?: T;
-  error?: string;
+  error?: ApiError;
   status: number;
 }
 
-// This function should be used outside of React components
 export const getAuthToken = (): string | null => {
   return localStorage.getItem('token');
 };
@@ -25,7 +29,7 @@ export const apiRequest = async <T>(
   }
 
   try {
-    const response = await fetch(`/api${endpoint}`, {
+    const response = await fetch(endpoint, {
       ...options,
       headers,
     });
@@ -34,7 +38,10 @@ export const apiRequest = async <T>(
 
     if (!response.ok) {
       return {
-        error: data?.message || 'An error occurred',
+        error: {
+          error: data?.error || 'Unknown error',
+          details: data?.details
+        },
         status: response.status,
       };
     }
@@ -46,7 +53,10 @@ export const apiRequest = async <T>(
   } catch (error) {
     console.error('API request error:', error);
     return {
-      error: 'Network error',
+      error: {
+        error: error instanceof Error ? error.message : 'Network error',
+        details: ['Failed to connect to the server. Please check your internet connection.']
+      },
       status: 0,
     };
   }
@@ -58,4 +68,6 @@ export const post = <T>(endpoint: string, body: any) =>
   apiRequest<T>(endpoint, { method: 'POST', body: JSON.stringify(body) });
 export const put = <T>(endpoint: string, body: any) =>
   apiRequest<T>(endpoint, { method: 'PUT', body: JSON.stringify(body) });
+export const patch = <T>(endpoint: string, body: any) =>
+  apiRequest<T>(endpoint, { method: 'PATCH', body: JSON.stringify(body) });
 export const del = <T>(endpoint: string) => apiRequest<T>(endpoint, { method: 'DELETE' });

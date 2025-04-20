@@ -1,90 +1,85 @@
 import { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { get, post } from '@/lib/api';
-import { mockApi, User } from '@/lib/mock';
-
-interface LoginResponse {
-  token: string;
-  id: string;
-  email: string;
-  username: string;
-  role: string;
-}
-
-interface AuthContextType {
-  isLoggedIn: boolean;
-  username: string | null;
-  isAdmin: boolean;
+import { post, put } from '@/lib/api';
+import { User } from "@/lib/types";
+interface AuthContextState {
   token: string | null;
   user: User | null;
   login: (email: string, password: string) => Promise<void>;
+  register: (firstName: string, lastName: string, email: string, password: string) => Promise<void>;
   logout: () => void;
-  register: (username: string, email: string, password: string) => Promise<void>;
+  updateUser: (user: User) => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
+export const AuthContext = createContext<AuthContextState | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [username, setUsername] = useState<string | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [token, setToken] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(localStorage.getItem('token'));
   const [user, setUser] = useState<User | null>(null);
 
-  // Check for existing token on mount
+  // Restore user state from localStorage on mount
   useEffect(() => {
-    const storedToken = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
-
-    if (storedToken && storedUser) {
-      const userData = JSON.parse(storedUser);
-      setToken(storedToken);
-      setUser(userData);
-      setUsername(userData.username);
-      setIsAdmin(userData.role === 'admin');
-      setIsLoggedIn(true);
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
     }
   }, []);
 
+  const setUserPersistent = (user: User | null) => {
+
+    if (user === null) {
+      setUser(null);
+      localStorage.removeItem('user');
+    } else {
+      setUser(user);
+      localStorage.setItem('user', JSON.stringify(user));
+    }
+
+  }
+
+  const setTokenPersistent = (token: string | null) => {
+    if (token === null) {
+      setToken(null);
+      localStorage.removeItem('token');
+    } else {
+      setToken(token);
+      localStorage.setItem('token', token);
+    }
+
+
+  }
+
   const login = async (email: string, password: string) => {
     try {
-      // Use mock API for now
-      const { token, user } = await mockApi.auth.login(email, password);
+      const response = await post<{ user: User; token: string }>('/api/user/login', { email, password });
+      if (response.error || !response.data) {
+        throw response.error || { error: "Unknown Error AuthContext" };
+      }
 
-      // In the future, uncomment this to use the real API
-      // const response = await post<LoginResponse>('/auth/login', { email, password });
-      // if (response.error || !response.data) {
-      //   throw new Error(response.error || 'Login failed');
-      // }
-      // const { token, id, username, email: userEmail, role } = response.data;
-      // const userData: User = { id, username, email: userEmail, role };
-
-      setToken(token);
-      setUser(user);
-      setUsername(user.username);
-      setIsAdmin(user.role === 'admin');
-      setIsLoggedIn(true);
-
-      // Store token and user data in localStorage
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
+      const { user, token } = response.data;
+      setUserPersistent(user);
+      setTokenPersistent(token);
     } catch (error) {
       console.error('Login error:', error);
       throw error;
     }
   };
 
-  const register = async (username: string, email: string, password: string) => {
+  const register = async (firstName: string, lastName: string, email: string, password: string) => {
     try {
-      // Use mock API for now
-      await mockApi.auth.register(username, email, password);
+      const registerObj = {
+        firstName,
+        lastName,
+        email,
+        // address: "Change your address now!",  // TODO(yushun): this will be optional later
+        isAdmin: false,
+        password,
+      };
 
-      // In the future, uncomment this to use the real API
-      // const response = await post<User>('/users', { username, email, password });
-      // if (response.error || !response.data) {
-      //   throw new Error(response.error || 'Registration failed');
-      // }
+      const response = await post<User>('/api/user', registerObj);
 
-      // After successful registration, log the user in
+      if (response.error || !response.data) {
+        throw response.error || { error: "Unknown Error AuthContext" };;
+      }
       await login(email, password);
     } catch (error) {
       console.error('Registration error:', error);
@@ -93,17 +88,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
-    setIsLoggedIn(false);
-    setUsername(null);
-    setIsAdmin(false);
-    setToken(null);
-    setUser(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    setTokenPersistent(null);
+    setUserPersistent(null);
+  };
+
+  const updateUser = async (user: User) => {
+    const response = await put<User>(`/api/user/${user.id}`, {
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      address: user.address,
+      isAdmin: user.isAdmin
+    });
+    if (response.error) {
+      throw response.error;
+    }
+    if (response.data) {
+      setUserPersistent(response.data);
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, username, isAdmin, token, user, login, logout, register }}>
+    <AuthContext.Provider
+      value={{
+        token,
+        user,
+        login,
+        register,
+        logout,
+        updateUser
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
