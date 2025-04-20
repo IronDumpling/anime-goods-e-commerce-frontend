@@ -33,7 +33,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(user);
       localStorage.setItem('user', JSON.stringify(user));
     }
-
   }
 
   const setTokenPersistent = (token: string | null) => {
@@ -44,8 +43,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(token);
       localStorage.setItem('token', token);
     }
-
-
   }
 
   const login = async (email: string, password: string) => {
@@ -70,12 +67,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         firstName,
         lastName,
         email,
-        // address: "Change your address now!",  // TODO(yushun): this will be optional later
         isAdmin: false,
         password,
       };
 
-      const response = await post<User>('/api/user', registerObj);
+      const response = await post<User>('/api/user', registerObj); 
 
       if (response.error || !response.data) {
         throw response.error || { error: "Unknown Error AuthContext" };;

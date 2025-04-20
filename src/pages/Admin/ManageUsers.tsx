@@ -12,7 +12,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react";
+import { ArrowUpDown, ChevronDown, MoreHorizontal, FileSpreadsheet } from "lucide-react";
 
 import BackButton from '@/components/layout/BackButton';
 import { Button } from "@/components/ui/Button";
@@ -46,7 +46,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useNavigate } from 'react-router-dom';
@@ -57,6 +56,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import ExcelImportDialog from '@/components/layout/ExcelImportDialog';
 
 const ManageUsers: React.FC = () => {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -87,6 +87,9 @@ const ManageUsers: React.FC = () => {
     failed: number;
     failedUsers: { id: number; name: string; reason: string }[];
   } | null>(null);
+
+  // Add state for Excel import dialog
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
 
   const columns: ColumnDef<User>[] = [
     {
@@ -227,7 +230,7 @@ const ManageUsers: React.FC = () => {
                 Copy ID
               </DropdownMenuItem>
               {/* TODO: make a better view orders when order is ready*/}
-              <DropdownMenuItem onClick={() => navigate(`/user/${user.id}/orders`)}>
+              <DropdownMenuItem onClick={() => navigate(`/admin/orders?userId=${user.id}`)}>
                 View Orders
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -490,7 +493,134 @@ const ManageUsers: React.FC = () => {
   };
 
   const handleExportUsers = () => {
-    exportTableToExcel(table, 'users-export');
+    exportTableToExcel(table, 'selected-users-export', true);
+  };
+
+  const handleExportAllUsers = () => {
+    exportTableToExcel(table, 'all-users-export', false);
+  };
+
+  const handleDeleteAll = async () => {
+    try {
+      setIsBulkDeleting(true);
+      const allRows = table.getFilteredRowModel().rows;
+
+      if (allRows.length === 0) {
+        toast.error("No users to delete");
+        return;
+      }
+
+      const results = {
+        success: 0,
+        failed: 0,
+        failedUsers: [] as { id: number; name: string; reason: string }[]
+      };
+
+      // Process each user deletion
+      for (const row of allRows) {
+        const user = row.original;
+        try {
+          const response = await del(`/api/user/${user.id}`);
+
+          if (response.error) {
+            // Check if the error is due to foreign key constraints
+            if (response.error.error && (
+              response.error.error.includes("foreign key") ||
+              response.error.error.includes("referenced")
+            )) {
+              results.failed++;
+              results.failedUsers.push({
+                id: user.id,
+                name: `${user.firstName} ${user.lastName}`,
+                reason: "Referenced by existing orders"
+              });
+            } else {
+              results.failed++;
+              results.failedUsers.push({
+                id: user.id,
+                name: `${user.firstName} ${user.lastName}`,
+                reason: "Unknown error"
+              });
+            }
+          } else {
+            results.success++;
+          }
+        } catch (error) {
+          results.failed++;
+          results.failedUsers.push({
+            id: user.id,
+            name: `${user.firstName} ${user.lastName}`,
+            reason: "Unknown error"
+          });
+        }
+      }
+
+      setBulkDeleteResults(results);
+
+      // Show appropriate toast message
+      if (results.success > 0) {
+        toast.success(`Successfully deleted ${results.success} user(s)`);
+      }
+
+      if (results.failed > 0) {
+        toast.error(`Failed to delete ${results.failed} user(s). See details below.`);
+      }
+
+      // Refresh the users list
+      const refreshed = await get<Array<User>>("/api/user/allCustomers");
+      if (refreshed.error || !refreshed.data) {
+        throw refreshed.error || { error: "Failed to refresh user data" };
+      }
+      setUsers(refreshed.data);
+    } catch (error) {
+      console.error("Failed to process bulk deletion:", error);
+      toast.error("An error occurred while processing the bulk deletion");
+    } finally {
+      setIsBulkDeleting(false);
+    }
+  };
+
+  // Add function to handle Excel import
+  const handleImportUsers = async (data: Partial<User>[]) => {
+    const results = {
+      success: [] as User[],
+      failed: [] as { row: number; data: any; reason: string }[]
+    };
+
+    for (let i = 0; i < data.length; i++) {
+      const userData = data[i];
+      try {
+        // Create user
+        const response = await post<User>("/api/user", userData);
+        if (response.error || !response.data) {
+          throw response.error || { error: "Failed to create user" };
+        }
+        results.success.push(response.data);
+      } catch (error) {
+        console.error(`Failed to import user at row ${i + 2}:`, error);
+        const apiError = error as ApiError;
+        const errorMessage = apiError.details && apiError.details.length > 0
+          ? `${apiError.error}: ${apiError.details.join(', ')}`
+          : apiError.error || "Unknown error";
+
+        results.failed.push({
+          row: i + 2,
+          data: userData,
+          reason: errorMessage
+        });
+      }
+    }
+
+    // Refresh the users list if at least one user was successfully imported
+    if (results.success.length > 0) {
+      const refreshed = await get<Array<User>>("/api/user/allCustomers");
+      if (refreshed.error || !refreshed.data) {
+        throw refreshed.error || { error: "Failed to refresh user data" };
+      }
+      setUsers(refreshed.data);
+    }
+
+    return results;
   };
 
   return (
@@ -498,16 +628,25 @@ const ManageUsers: React.FC = () => {
       <div className="container mx-auto py-10">
         <BackButton to={`/admin`} label="Back to Admin Page" />
         <h1 className="text-2xl font-bold mb-6">Manage Accounts</h1>
-        <Button
-          onClick={() => {
-            setCurrentUser({});
-            setFormMode("create");
-            setDialogOpen(true);
-          }}
-          className="mb-4"
-        >
-          + Add Account
-        </Button>
+        <div className="flex gap-2 mb-4">
+          <Button
+            onClick={() => {
+              setCurrentUser({});
+              setFormMode("create");
+              setDialogOpen(true);
+            }}
+          >
+            + Add Account
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => setImportDialogOpen(true)}
+            className="flex items-center gap-2"
+          >
+            <FileSpreadsheet className="h-4 w-4" />
+            Import Excel
+          </Button>
+        </div>
         <div className="w-full">
           <div className="flex items-center py-4">
             <Input
@@ -516,27 +655,40 @@ const ManageUsers: React.FC = () => {
               onChange={(event) => setGlobalFilter(event.target.value)}
               className="max-w-sm"
             />
-            {table.getFilteredSelectedRowModel().rows.length > 0 && (
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="ml-4">
-                    Bulk Actions <ChevronDown className="ml-2 h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onClick={handleExportUsers}>
-                    Export as Excel
-                  </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem
-                    className="text-red-600 focus:text-red-600"
-                    onClick={() => setBulkDeleteDialogOpen(true)}
-                  >
-                    Delete Selected ({table.getFilteredSelectedRowModel().rows.length})
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            )}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="ml-4">
+                  Bulk Actions <ChevronDown className="ml-2 h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem
+                  onClick={handleExportUsers}
+                  disabled={table.getFilteredSelectedRowModel().rows.length === 0}
+                >
+                  Export selected
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={handleExportAllUsers}
+                >
+                  Export all
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-red-600 focus:text-red-600"
+                  onClick={() => setBulkDeleteDialogOpen(true)}
+                  disabled={table.getFilteredSelectedRowModel().rows.length === 0}
+                >
+                  Delete Selected ({table.getFilteredSelectedRowModel().rows.length})
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  className="text-red-600 focus:text-red-600"
+                  onClick={handleDeleteAll}
+                >
+                  Delete All ({table.getFilteredRowModel().rows.length})
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="ml-auto">
@@ -841,6 +993,34 @@ const ManageUsers: React.FC = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Add Excel Import Dialog */}
+      <ExcelImportDialog<User>
+        open={importDialogOpen}
+        onOpenChange={setImportDialogOpen}
+        onImport={handleImportUsers}
+        title="Import Users from Excel"
+        description="Upload an Excel file containing user information to create multiple accounts at once."
+        requiredFields={["firstName", "lastName", "email", "password"]}
+        ignoredFields={["id", "createdAt", "updatedAt"]}
+        additionalFields={["address", "isAdmin"]}
+        fieldValidators={{
+          email: (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
+          password: (value) => value.length >= 6
+        }}
+        validateRow={(row) => {
+          // Additional validation for user data
+          if (row.isAdmin !== undefined && typeof row.isAdmin !== 'boolean') {
+            // Convert string values to boolean
+            if (typeof row.isAdmin === 'string') {
+              row.isAdmin = row.isAdmin.toLowerCase() === 'true' || row.isAdmin.toLowerCase() === 'yes';
+            } else {
+              return { valid: false, reason: "isAdmin must be a boolean value" };
+            }
+          }
+          return { valid: true };
+        }}
+      />
     </ProtectedRoute>
   );
 };
