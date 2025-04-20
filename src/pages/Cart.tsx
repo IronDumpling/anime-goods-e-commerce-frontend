@@ -15,10 +15,10 @@ function Cart() {
     removeItem,
     selectAll,
     removeSelected,
+    isLoading
   } = useCart();
   const navigate = useNavigate();
 
-  console.log(cartItems);
   // Filter selected items and calculate totals
   const selectedItems = cartItems.filter(item => item.selected);
   const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -32,6 +32,14 @@ function Cart() {
   // Use selected items' totals if any items are selected, otherwise use all items' totals
   const displayTotalItems = selectedItems.length > 0 ? selectedTotalItems : totalItems;
   const displayTotalPrice = selectedItems.length > 0 ? selectedTotalPrice : totalPrice;
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-10">
+        <div className="text-center">Loading cart...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-10">

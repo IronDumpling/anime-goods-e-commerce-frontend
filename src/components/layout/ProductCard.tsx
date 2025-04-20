@@ -12,7 +12,8 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const [imageError, setImageError] = useState(false);
-  const { addItem } = useCart();
+
+  const { addItem, isLoading } = useCart();
   const isInactive = product.status === 'INACTIVE';
 
   return (
@@ -54,11 +55,12 @@ export function ProductCard({ product }: ProductCardProps) {
         <Button
           size="sm"
           className="text-primary-foreground"
-          disabled={product.stock <= 0 || isInactive}
+
+          disabled={product.stock <= 0 || isLoading || isInactive}
           onClick={() => addItem(product)}
         >
           <ShoppingCart className="mr-2 h-4 w-4" />
-          Add to Cart
+          {isLoading ? "Loading..." : "Add to Cart"}
         </Button>
       </div>
     </div>
