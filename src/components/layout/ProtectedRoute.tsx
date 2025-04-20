@@ -42,6 +42,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         }
         setResolvedUserId(resId);
         setIsLoading(false);
+      } else {
+        setResolvedUserId(undefined);
+        setIsLoading(false);
       }
     };
     setIsLoading(true);
