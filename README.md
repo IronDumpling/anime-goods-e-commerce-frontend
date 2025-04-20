@@ -1,54 +1,164 @@
-# React + TypeScript + Vite
+Here's a complete `README.md` for your frontend course project, structured to reflect your architecture, flow, and use cases:
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+---
 
-Currently, two official plugins are available:
+# 🛍️ Full-Stack E-Commerce Frontend (React + TypeScript)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+This project is the **frontend** of a full-stack e-commerce platform built with **React**, **TypeScript**, and **TailwindCSS**, offering robust user and admin functionality including shopping, checkout, user profiles, order management, and admin dashboards.
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 📸 Project Previews
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+- ### 📦 Product Browsing
+  ![](./Product.png)
+
+- ### 📑 Order Flow
+  ![](./Order.png)
+
+- ### 🛒 Shopping Cart & Checkout
+  ![](./Frontend%20Shopping%20Cart.png)
+
+- ### 👤 User Flows
+  ![](./Frontend%20User.png)
+
+- ### 🗂️ Pages & Access Design
+  ![](./frontend.drawio.png)
+
+- ### 🏗️ Infrastructure Overview
+  ![](./Infrastracture.png)
+
+---
+
+## 🧠 Project Features
+
+### 🛍️ Users
+- Browse products by category, price, stock status.
+- View product detail pages.
+- Add to cart or buy now.
+- Manage cart (edit, remove, checkout).
+- Checkout requires authentication.
+
+### 👤 User Profile
+- View/update personal information (name, email, address).
+- Change password (with current-password validation).
+- View order history and detail.
+- Delete account.
+
+### 📦 Orders
+- Place orders with multiple products.
+- View order details with product breakdown.
+- Filter and track order status (Pending, Shipped, Delivered, Cancelled).
+
+### 👨‍💼 Admins
+- Access full dashboards.
+- Manage all users (view/edit/delete).
+- Manage all products (CRUD).
+- Manage all orders (update status, view details).
+
+---
+
+## 🧩 Project Structure
+
+```
+📁 src/
+├── components/          # Reusable UI components
+├── context/             # Auth context
+├── pages/               # Page-level components
+│   ├── User/            # /user/:id routes
+│   ├── Admin/           # /admin routes
+│   ├── Product/         # /products
+│   └── Order/           # /orders
+├── lib/                 # Utility functions, API handlers
+├── assets/              # Images & icons
+└── App.tsx              # Main router
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 🔐 Authentication & Authorization
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+- ✅ Protected routes use `<ProtectedRoute accessLevel="user" | "admin" | "self" | "self-and-admin" />`.
+- 🔐 Login state is stored in AuthContext.
+- 👮‍♂️ Route guard prevents unauthorized access to sensitive pages.
+
+---
+
+## 🔁 API Interaction
+
+Uses a centralized `api.ts` wrapper for all HTTP calls. Example:
+
+```ts
+const response = await get<Product[]>("/api/products");
 ```
+
+When placing an order:
+
+```ts
+POST /api/order
+{
+  userId: 1,
+  status: "PENDING",
+  items: [{ productId: 3, quantity: 2 }]
+}
+```
+
+---
+
+## 📦 Tech Stack
+
+| Tool               | Purpose                            |
+|--------------------|------------------------------------|
+| React              | Frontend framework                 |
+| TypeScript         | Type safety                        |
+| React Router       | Routing                            |
+| Tailwind CSS       | Styling                            |
+| ShadCN/UI          | UI Components                      |
+| Prisma (Backend)   | ORM for PostgreSQL                 |
+| Express.js (Backend)| API server                        |
+| AWS S3             | Media/Image storage                |
+
+---
+
+## 🧪 Sample User Flows
+
+### Guest Browsing
+1. Visit Product List
+2. View Product Details
+3. Try to checkout → redirect to login
+4. Register → redirect back to checkout
+
+### Authenticated User
+1. Add to cart
+2. Place order → view order list
+3. Click to edit profile
+4. Change password
+
+### Admin
+1. Login as Admin
+2. View Admin Dashboard
+3. Manage products & orders
+4. Edit/delete user profiles
+
+---
+
+## 📌 Notes
+
+- Password fields are **not fetched** from backend for security reasons.
+- The cart state is stored in client memory (React context or state).
+- DISCONTINUED products are filtered on the frontend.
+- Admins have access to all order and user records.
+
+---
+
+## 🚀 Getting Started
+
+```bash
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+```
+
+> Backend must be running on `localhost:5173` (or update proxy config)
