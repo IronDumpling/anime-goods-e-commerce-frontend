@@ -24,18 +24,13 @@ function OrderDetail() {
       if (!orderId || !user) return;
 
       try {
-        console.log("User ID:", user.id, "Is Admin:", user.isAdmin);
         const response = await get<Order>("/api/order/" + parseInt(orderId));
-        console.log("Order API Response:", response);
-
         if (response.error || !response.data) {
           throw response.error || { error: "Unknown Error Order Detail"};
         }
 
         // Verify that the order belongs to the current user
         const orderData = response.data;
-        console.log("Order User ID:", orderData.userId);
-
         if (!user.isAdmin && orderData.userId !== user.id) {
           setError("You do not have permission to view this order");
           return;
@@ -105,7 +100,7 @@ function OrderDetail() {
       paramKey='orderId'
     >
       <div className="container mx-auto px-4 py-10">
-        <BackButton to={`/orders`} label="Back to Orders" />
+        <BackButton to={`/user/${user?.id}/orders`} label="Back to Orders" />
         <h1 className="text-2xl font-bold mb-6">Order #{order.id}</h1>
 
         <div className="grid gap-6">
