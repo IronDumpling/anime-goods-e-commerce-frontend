@@ -2,27 +2,7 @@
 
 This project is the **frontend** of a full-stack e-commerce platform built with **React**, **TypeScript**, and **TailwindCSS**, offering robust user and admin functionality including shopping, checkout, user profiles, order management, and admin dashboards.
 
----
-
-## 📸 Project Previews
-
-- ### 📦 Product Browsing
-  ![](./Product.png)
-
-- ### 📑 Order Flow
-  ![](./Order.png)
-
-- ### 🛒 Shopping Cart & Checkout
-  ![](./Frontend%20Shopping%20Cart.png)
-
-- ### 👤 User Flows
-  ![](./Frontend%20User.png)
-
-- ### 🗂️ Pages & Access Design
-  ![](./frontend.drawio.png)
-
-- ### 🏗️ Infrastructure Overview
-  ![](./Infrastracture.png)
+For full documentation, visit our [backend repository](https://github.com/LittlePetunia/ece1724-anime-goods-e-commerce-backend).
 
 ---
 
@@ -34,6 +14,7 @@ This project is the **frontend** of a full-stack e-commerce platform built with 
 - Add to cart or buy now.
 - Manage cart (edit, remove, checkout).
 - Checkout requires authentication.
+- Import/Export products as Excel
 
 ### 👤 User Profile
 - View/update personal information (name, email, address).
@@ -103,16 +84,18 @@ POST /api/order
 
 ## 📦 Tech Stack
 
-| Tool               | Purpose                            |
-|--------------------|------------------------------------|
-| React              | Frontend framework                 |
-| TypeScript         | Type safety                        |
-| React Router       | Routing                            |
-| Tailwind CSS       | Styling                            |
-| ShadCN/UI          | UI Components                      |
-| Prisma (Backend)   | ORM for PostgreSQL                 |
-| Express.js (Backend)| API server                        |
-| AWS S3             | Media/Image storage                |
+| Tool                | Purpose                            |
+|---------------------|------------------------------------|
+| React               | Frontend framework                 |
+| TypeScript          | Type safety                        |
+| Vite                | Build tool & development server    |
+| React Router        | Routing                            |
+| Tailwind CSS        | Styling                            |
+| ShadCN/UI           | UI Components                      |
+| Prisma (Backend)    | ORM for PostgreSQL                 |
+| Express.js (Backend)| API server                         |
+| AWS S3              | Media/Image storage                |
+| XLSX                | Table Import/Export                |
 
 ---
 
@@ -141,9 +124,10 @@ POST /api/order
 ## 📌 Notes
 
 - Password fields are **not fetched** from backend for security reasons.
-- The cart state is stored in client memory (React context or state).
+- The cart state is stored in client memory (localStorage).
 - DISCONTINUED products are filtered on the frontend.
 - Admins have access to all order and user records.
+- Dark mode support available.
 
 ---
 
@@ -155,6 +139,18 @@ npm install
 
 # Start development server
 npm run dev
+
+# Build for production
+npm run build
 ```
 
 > Backend must be running on `localhost:5173` (or update proxy config)
+
+## 🔧 Configurations
+
+The project uses several configuration files:
+- `vite.config.ts` - Vite configuration
+- `tailwind.config.js` - Tailwind CSS configuration
+- `tsconfig.json` - TypeScript configuration
+- `eslint.config.js` - ESLint configuration
+- `postcss.config.cjs` - PostCSS configuration
