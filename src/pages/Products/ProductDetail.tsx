@@ -53,6 +53,8 @@ function ProductDetail() {
     );
   }
 
+  const isInactive = product.status === 'INACTIVE';
+
   return (
     <div className="container mx-auto px-4 py-10">
       <BackButton to={`/products`} label="Back to Product List" />
@@ -74,6 +76,7 @@ function ProductDetail() {
         <div>
           <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
           <Badge className="mb-4">{product.category}</Badge>
+          {isInactive && <Badge className="mb-2 bg-yellow-600">Inactive</Badge>}
           <p className="text-2xl font-bold text-primary mb-4">${product.price.toFixed(2)}</p>
           <p className="text-muted-foreground mb-6">{product.description}</p>
           <div className="mb-4">
@@ -85,7 +88,7 @@ function ProductDetail() {
           <div className="flex gap-4">
             <Button
               className="flex-1"
-              disabled={product.stock === 0}
+              disabled={product.stock === 0 || isInactive}
               onClick={() => addItem(product)}
             >
               <ShoppingCart className="mr-2 h-5 w-5" />

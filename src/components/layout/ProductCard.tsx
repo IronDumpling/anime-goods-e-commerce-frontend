@@ -13,6 +13,7 @@ interface ProductCardProps {
 export function ProductCard({ product }: ProductCardProps) {
   const [imageError, setImageError] = useState(false);
   const { addItem } = useCart();
+  const isInactive = product.status === 'INACTIVE';
 
   return (
     <div className="bg-card text-card-foreground rounded-xl border shadow-sm overflow-hidden hover:shadow-lg transition-shadow h-full flex flex-col">
@@ -37,6 +38,7 @@ export function ProductCard({ product }: ProductCardProps) {
         >
           {product.stock > 0 ? "In Stock" : "Out of Stock"}
         </Badge>
+        {isInactive && <Badge className="absolute top-2 left-2 bg-yellow-600">Inactive</Badge>}
       </div>
       <div className="p-3 flex-grow">
         <h3 className="text-lg font-semibold truncate">{product.name}</h3>
@@ -52,7 +54,7 @@ export function ProductCard({ product }: ProductCardProps) {
         <Button
           size="sm"
           className="text-primary-foreground"
-          disabled={product.stock <= 0}
+          disabled={product.stock <= 0 || isInactive}
           onClick={() => addItem(product)}
         >
           <ShoppingCart className="mr-2 h-4 w-4" />

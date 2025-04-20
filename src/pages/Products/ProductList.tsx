@@ -48,7 +48,8 @@ function ProductList() {
           get<{ products: Product[] }>("/api/product"),
           typesApi.categories.getAll(),
         ]);
-        setProducts(productsRes.data?.products || []);
+        const visibleProducts = productsRes.data?.products.filter(product => product.status !== 'DISCONTINUED');
+        setProducts(visibleProducts || []);
         setCategories(categoriesData);
       } catch (err) {
         setError('Failed to load products');
