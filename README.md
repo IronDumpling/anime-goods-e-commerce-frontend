@@ -1,7 +1,3 @@
-Here's a complete `README.md` for your frontend course project, structured to reflect your architecture, flow, and use cases:
-
----
-
 # 🛍️ Full-Stack E-Commerce Frontend (React + TypeScript)
 
 This project is the **frontend** of a full-stack e-commerce platform built with **React**, **TypeScript**, and **TailwindCSS**, offering robust user and admin functionality including shopping, checkout, user profiles, order management, and admin dashboards.
