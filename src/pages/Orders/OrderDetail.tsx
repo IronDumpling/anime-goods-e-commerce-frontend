@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
+import { ImageOff } from 'lucide-react';
 
 import { get } from "@/lib/api";
 import { addOrderTotal } from '@/lib/utils';
@@ -18,6 +19,7 @@ function OrderDetail() {
   const [products, setProducts] = useState<Record<number, Product>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [imageErrors, setImageErrors] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
     const fetchOrderDetails = async () => {
@@ -61,6 +63,13 @@ function OrderDetail() {
 
     fetchOrderDetails();
   }, [orderId, user]);
+
+  const handleImageError = (productId: number) => {
+    setImageErrors(prev => ({
+      ...prev,
+      [productId]: true
+    }));
+  };
 
   if (isLoading) {
     return (
@@ -139,11 +148,20 @@ function OrderDetail() {
                   return (
                     <div key={item.productId} className="flex items-center gap-4">
                       {product && (
-                        <img
-                          src={product.imageURL}
-                          alt={product.name}
-                          className="w-20 h-20 object-cover rounded"
-                        />
+                        <div className="w-20 h-20 relative bg-muted rounded flex-shrink-0">
+                          {imageErrors[item.productId] ? (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <ImageOff className="h-6 w-6 text-muted-foreground" />
+                            </div>
+                          ) : (
+                            <img
+                              src={product.imageURL}
+                              alt={product.name}
+                              className="w-full h-full object-cover rounded"
+                              onError={() => handleImageError(item.productId)}
+                            />
+                          )}
+                        </div>
                       )}
                       <div className="flex-1">
                         <h3 className="font-medium">
