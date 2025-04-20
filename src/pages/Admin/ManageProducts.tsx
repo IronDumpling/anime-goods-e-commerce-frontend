@@ -51,9 +51,10 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { post, put, get, del, ApiError } from "@/lib/api";
 import { Product } from '@/lib/types';
-import { exportTableToCSV } from "@/lib/csvUtils";
+import { exportTableToExcel } from "@/lib/excelUtils";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { ImageUpload } from '@/components/layout/ImageUpload';
 
 const ManageProducts: React.FC = () => {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -88,6 +89,8 @@ const ManageProducts: React.FC = () => {
     failed: number;
     failedProducts: { id: number; name: string; reason: string }[];
   } | null>(null);
+
+  const [imageInputMethod, setImageInputMethod] = useState<'url' | 'upload'>('url');
 
   const handleSubmit = async () => {
     try {
@@ -213,6 +216,43 @@ const ManageProducts: React.FC = () => {
     {
       accessorKey: "imageURL",
       header: "Image URL",
+      cell: ({ row }) => {
+        const imageURL = row.getValue("imageURL") as string;
+        if (!imageURL) return <span className="text-gray-400">No image</span>;
+
+        // If URL is too long, display abbreviated version
+        const displayText = imageURL.length > 30
+          ? `${imageURL.substring(0, 15)}...${imageURL.substring(imageURL.length - 15)}`
+          : imageURL;
+
+        // Check if it's a valid URL (starts with http or https)
+        const isValidUrl = /^https?:\/\//i.test(imageURL);
+
+        if (isValidUrl) {
+          // If it's a valid URL, display as a clickable link
+          return (
+            <a
+              href={imageURL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:text-blue-800 hover:underline truncate max-w-[200px] block"
+              title={imageURL} // Show full URL as hover tooltip
+            >
+              {displayText}
+            </a>
+          );
+        } else {
+          // If it's not a valid URL, display as plain text
+          return (
+            <span
+              className="truncate max-w-[200px] block"
+              title={imageURL} // Show full text as hover tooltip
+            >
+              {displayText}
+            </span>
+          );
+        }
+      },
     },
     {
       accessorKey: "category",
@@ -595,6 +635,19 @@ const ManageProducts: React.FC = () => {
     }
   };
 
+  // Replace the export handler
+  const handleExportProducts = () => {
+    exportTableToExcel(table, 'products-export');
+  };
+
+  const handleImageUploadComplete = (fileUrlMap: Record<string, string>) => {
+    // Get the first URL from the map
+    const firstUrl = Object.values(fileUrlMap)[0];
+    if (firstUrl) {
+      setCurrentProduct(prev => ({ ...prev, imageURL: firstUrl }));
+    }
+  };
+
   return (
     <ProtectedRoute accessLevel="admin">
       <div className="container mx-auto py-10">
@@ -651,8 +704,8 @@ const ManageProducts: React.FC = () => {
                     </DropdownMenuPortal>
                   </DropdownMenuSub>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => exportTableToCSV(table, "products-export")}>
-                    Export Selected
+                  <DropdownMenuItem onClick={handleExportProducts}>
+                    Export as Excel
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
@@ -747,7 +800,13 @@ const ManageProducts: React.FC = () => {
           }
         }}
       >
-        <DialogContent>
+        <DialogContent
+          className="max-w-2xl"
+          style={{
+            maxWidth: imageInputMethod === 'upload' ? '45rem' : '30rem',
+            width: '100%'
+          }}
+        >
           <DialogHeader>
             <DialogTitle>{formMode === "create" ? "Add Product" : "Update Product"}</DialogTitle>
           </DialogHeader>
@@ -756,54 +815,108 @@ const ManageProducts: React.FC = () => {
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-          <div className="space-y-4">
-            <div>
-              <Label>Name</Label>
-              <Input value={currentProduct.name || ""} onChange={(e) => setCurrentProduct((p) => ({ ...p, name: e.target.value }))} />
-            </div>
-            <div>
-              <Label>Brand</Label>
-              <Input value={currentProduct.brand || ""} onChange={(e) => setCurrentProduct((p) => ({ ...p, brand: e.target.value }))} />
-            </div>
-            <div>
-              <Label>Category</Label>
-              <Input value={currentProduct.category || ""} onChange={(e) => setCurrentProduct((p) => ({ ...p, category: e.target.value }))} />
-            </div>
-            <div>
-              <Label>Description</Label>
-              <Input value={currentProduct.description || ""} onChange={(e) => setCurrentProduct((p) => ({ ...p, description: e.target.value }))} />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label>Price</Label>
-                <Input type="number" value={currentProduct.price || ""} onChange={(e) => setCurrentProduct((p) => ({ ...p, price: parseFloat(e.target.value) }))} />
+
+          <div className={`grid grid-cols-1 ${imageInputMethod === 'upload' ? 'md:grid-cols-2' : ''} gap-6 mt-4`}>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Name</Label>
+                <Input value={currentProduct.name || ""} onChange={(e) => setCurrentProduct((p) => ({ ...p, name: e.target.value }))} />
               </div>
-              <div>
-                <Label>Stock</Label>
-                <Input type="number" value={currentProduct.stock || ""} onChange={(e) => setCurrentProduct((p) => ({ ...p, stock: parseInt(e.target.value) }))} />
+              <div className="space-y-2">
+                <Label>Brand</Label>
+                <Input value={currentProduct.brand || ""} onChange={(e) => setCurrentProduct((p) => ({ ...p, brand: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <Input value={currentProduct.category || ""} onChange={(e) => setCurrentProduct((p) => ({ ...p, category: e.target.value }))} />
+              </div>
+              <div className="space-y-2">
+                <Label>Description</Label>
+                <Input value={currentProduct.description || ""} onChange={(e) => setCurrentProduct((p) => ({ ...p, description: e.target.value }))} />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Price</Label>
+                  <Input type="number" value={currentProduct.price || ""} onChange={(e) => setCurrentProduct((p) => ({ ...p, price: parseFloat(e.target.value) }))} />
+                </div>
+                <div className="space-y-2">
+                  <Label>Stock</Label>
+                  <Input type="number" value={currentProduct.stock || ""} onChange={(e) => setCurrentProduct((p) => ({ ...p, stock: parseInt(e.target.value) }))} />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <Select value={currentProduct.status || "ACTIVE"} onValueChange={(val) => setCurrentProduct((p) => ({ ...p, status: val as Product["status"] }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="ACTIVE">ACTIVE</SelectItem>
+                    <SelectItem value="INACTIVE">INACTIVE</SelectItem>
+                    <SelectItem value="DISCONTINUED">DISCONTINUED</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
-            <div>
-              <Label>Status</Label>
-              <Select value={currentProduct.status || "ACTIVE"} onValueChange={(val) => setCurrentProduct((p) => ({ ...p, status: val as Product["status"] }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ACTIVE">ACTIVE</SelectItem>
-                  <SelectItem value="INACTIVE">INACTIVE</SelectItem>
-                  <SelectItem value="DISCONTINUED">DISCONTINUED</SelectItem>
-                </SelectContent>
-              </Select>
+
+            {imageInputMethod === 'upload' && (
+              <div className="space-y-4">
+                <div>
+                  <ImageUpload
+                    onUploadComplete={handleImageUploadComplete}
+                    label="Upload Product Image"
+                    mode="single"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Image URL section at the bottom */}
+          <div className="mt-6 space-y-4">
+            <div className="space-y-2">
+              <Label>Image</Label>
+              <div className="space-y-2">
+                <div className="flex space-x-2 mb-2">
+                  <Button
+                    type="button"
+                    variant={imageInputMethod === 'url' ? 'default' : 'outline'}
+                    onClick={() => setImageInputMethod('url')}
+                    className="flex-1"
+                  >
+                    Enter URL
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={imageInputMethod === 'upload' ? 'default' : 'outline'}
+                    onClick={() => setImageInputMethod('upload')}
+                    className="flex-1"
+                  >
+                    Upload to S3
+                  </Button>
+                </div>
+              </div>
             </div>
-            <div>
+
+            <div className="space-y-2">
               <Label>Image URL</Label>
-              <Input value={currentProduct.imageURL || ""} onChange={(e) => setCurrentProduct((p) => ({ ...p, imageURL: e.target.value }))} />
+              <Input
+                value={currentProduct.imageURL || ""}
+                onChange={(e) => setCurrentProduct((p) => ({ ...p, imageURL: e.target.value }))}
+                disabled={imageInputMethod === 'upload'}
+                className={imageInputMethod === 'upload' ? "bg-gray-100" : ""}
+              />
+              <div className="h-5"> {/* Fixed height container */}
+                {imageInputMethod === 'upload' && (
+                  <p className="text-xs text-gray-500">Image URL is automatically set when you upload an image</p>
+                )}
+              </div>
             </div>
-            <div className="flex justify-end gap-2 mt-4">
-              <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-              <Button onClick={handleSubmit}>{formMode === "create" ? "Create" : "Update"}</Button>
-            </div>
+          </div>
+
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+            <Button onClick={handleSubmit}>{formMode === "create" ? "Create" : "Update"}</Button>
           </div>
         </DialogContent>
       </Dialog>

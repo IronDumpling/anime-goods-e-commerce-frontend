@@ -29,11 +29,15 @@ export interface ProductCategory {
 export interface Order {
   id: number;
   userId: number;
-  user: User;
-  orderItems: OrderItem[];
-  status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
+  status: "PENDING" | "PROCESSING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
   createdAt: string;
-  updateAt: string;
+  updatedAt: string;
+  user: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
+  orderItems: OrderItem[];
 }
 
 export interface OrderItem {
@@ -42,8 +46,9 @@ export interface OrderItem {
   productId: number;
   quantity: number;
   unitPrice: number;
-  order: Order;
-  product: Product;
+  product: {
+    name: string;
+  };
 }
 
 export const ProductCategories: ProductCategory[] = [

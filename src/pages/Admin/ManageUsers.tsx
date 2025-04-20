@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/table";
 import { get, post, put, del, ApiError } from "@/lib/api";
 import { User } from "@/lib/types";
-import { exportTableToCSV } from "@/lib/csvUtils";
+import { exportTableToExcel } from "@/lib/excelUtils";
 import {
   Dialog,
   DialogContent,
@@ -50,6 +50,13 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useNavigate } from 'react-router-dom';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const ManageUsers: React.FC = () => {
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -482,6 +489,10 @@ const ManageUsers: React.FC = () => {
     }
   };
 
+  const handleExportUsers = () => {
+    exportTableToExcel(table, 'users-export');
+  };
+
   return (
     <ProtectedRoute accessLevel="admin">
       <div className="container mx-auto py-10">
@@ -513,8 +524,8 @@ const ManageUsers: React.FC = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => exportTableToCSV(table, "users-export")}>
-                    Export Selected
+                  <DropdownMenuItem onClick={handleExportUsers}>
+                    Export as Excel
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
@@ -656,7 +667,7 @@ const ManageUsers: React.FC = () => {
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}
-            <div>
+            <div className="space-y-2">
               <Label>First Name</Label>
               <Input
                 value={currentUser.firstName || ""}
@@ -664,7 +675,7 @@ const ManageUsers: React.FC = () => {
                 required
               />
             </div>
-            <div>
+            <div className="space-y-2">
               <Label>Last Name</Label>
               <Input
                 value={currentUser.lastName || ""}
@@ -672,7 +683,7 @@ const ManageUsers: React.FC = () => {
                 required
               />
             </div>
-            <div>
+            <div className="space-y-2">
               <Label>Email</Label>
               <Input
                 type="email"
@@ -681,7 +692,7 @@ const ManageUsers: React.FC = () => {
                 required
               />
             </div>
-            <div>
+            <div className="space-y-2">
               <Label>Address</Label>
               <Input
                 value={currentUser.address || ""}
@@ -689,7 +700,7 @@ const ManageUsers: React.FC = () => {
               />
             </div>
             {formMode === "create" && (
-              <div>
+              <div className="space-y-2">
                 <Label>Password</Label>
                 <Input
                   type="password"
@@ -699,13 +710,17 @@ const ManageUsers: React.FC = () => {
                 />
               </div>
             )}
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="isAdmin"
-                checked={currentUser.isAdmin || false}
-                onCheckedChange={(checked) => setCurrentUser((u) => ({ ...u, isAdmin: checked }))}
-              />
-              <Label htmlFor="isAdmin">Admin User</Label>
+            <div className="space-y-2">
+              <Label>Role</Label>
+              <Select value={currentUser.isAdmin ? "ADMIN" : "USER"} onValueChange={(val) => setCurrentUser((u) => ({ ...u, isAdmin: val === "ADMIN" }))} required>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select Role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="USER">USER</SelectItem>
+                  <SelectItem value="ADMIN">ADMIN</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex justify-end gap-2 mt-4">
               <Button variant="outline" onClick={() => setDialogOpen(false)} disabled={isSubmitting}>

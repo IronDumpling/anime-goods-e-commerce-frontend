@@ -70,7 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         firstName,
         lastName,
         email,
-        address: "Change your address now!",  // TODO(yushun): this will be optional later
+        // address: "Change your address now!",  // TODO(yushun): this will be optional later
         isAdmin: false,
         password,
       };
